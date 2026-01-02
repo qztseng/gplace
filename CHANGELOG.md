@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 - 2026-01-02
+
+- Autocomplete suggestions for places and queries (client + CLI).
+- Nearby search with included/excluded types and location restriction.
+- Place photos in details plus photo media URL lookup.
+- Route search along a driving route using the Routes API. (#1) — thanks @jamesbrooksco
+- Added Routes API base URL override (`GOOGLE_ROUTES_BASE_URL`).
+- Docs: expanded API key setup, inline CLI examples, and new feature docs.
+- CI: upgrade golangci-lint v2; goreleaser build-only CI mode.
+
 ## 0.1.0 - 2026-01-02
 
 - Go client for Google Places API (New).
