@@ -11,6 +11,7 @@ import (
 const (
 	detailsFieldMaskBase   = "id,displayName,formattedAddress,location,rating,priceLevel,types,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri"
 	detailsFieldMaskReview = "reviews"
+	detailsFieldMaskPhotos = "photos"
 )
 
 // Details fetches details for a specific place ID.
@@ -47,11 +48,15 @@ func (c *Client) DetailsWithOptions(ctx context.Context, req DetailsRequest) (Pl
 }
 
 func detailsFieldMaskForRequest(req DetailsRequest) string {
+	fields := []string{detailsFieldMaskBase}
 	if req.IncludeReviews {
 		// Reviews are heavy; opt-in to include them.
-		return detailsFieldMaskBase + "," + detailsFieldMaskReview
+		fields = append(fields, detailsFieldMaskReview)
 	}
-	return detailsFieldMaskBase
+	if req.IncludePhotos {
+		fields = append(fields, detailsFieldMaskPhotos)
+	}
+	return strings.Join(fields, ",")
 }
 
 func mapPlaceDetails(place placeItem) PlaceDetails {
@@ -68,5 +73,6 @@ func mapPlaceDetails(place placeItem) PlaceDetails {
 		Hours:      weekdayDescriptions(place.RegularOpeningHours),
 		OpenNow:    openNow(place.CurrentOpeningHours),
 		Reviews:    mapReviews(place.Reviews),
+		Photos:     mapPhotos(place.Photos),
 	}
 }

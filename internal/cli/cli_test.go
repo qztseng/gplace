@@ -289,6 +289,35 @@ func TestRunDetailsWithReviews(t *testing.T) {
 	}
 }
 
+func TestRunDetailsWithPhotos(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("X-Goog-FieldMask"), "photos") {
+			t.Fatalf("expected photos in field mask: %s", r.Header.Get("X-Goog-FieldMask"))
+		}
+		_, _ = w.Write([]byte(`{"id": "place-1", "photos": [{"name": "places/place-1/photos/photo-1"}]}`))
+	}))
+	defer server.Close()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	exitCode := Run([]string{
+		"details",
+		"place-1",
+		"--api-key", "test-key",
+		"--base-url", server.URL,
+		"--photos",
+		"--json",
+	}, &stdout, &stderr)
+
+	if exitCode != 0 {
+		t.Fatalf("expected exit code 0, got %d", exitCode)
+	}
+	if !strings.Contains(stdout.String(), "\"photos\"") {
+		t.Fatalf("unexpected stdout: %s", stdout.String())
+	}
+}
+
 func TestRunDetailsHuman(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(`{"id": "place-2", "displayName": {"text": "Park"}}`))
@@ -310,6 +339,61 @@ func TestRunDetailsHuman(t *testing.T) {
 	}
 	if !strings.Contains(stdout.String(), "Park") {
 		t.Fatalf("unexpected stdout: %s", stdout.String())
+	}
+}
+
+func TestRunPhotoJSON(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/places/place-1/photos/photo-1/media" {
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+		_, _ = w.Write([]byte(`{"photoUri": "https://example.com/photo.jpg"}`))
+	}))
+	defer server.Close()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	exitCode := Run([]string{
+		"photo",
+		"places/place-1/photos/photo-1",
+		"--api-key", "test-key",
+		"--base-url", server.URL,
+		"--json",
+	}, &stdout, &stderr)
+
+	if exitCode != 0 {
+		t.Fatalf("expected exit code 0, got %d", exitCode)
+	}
+	if !strings.Contains(stdout.String(), "\"photo_uri\"") {
+		t.Fatalf("unexpected stdout: %s", stdout.String())
+	}
+}
+
+func TestRunPhotoHuman(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"photoUri": "https://example.com/photo.jpg"}`))
+	}))
+	defer server.Close()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	exitCode := Run([]string{
+		"photo",
+		"places/place-1/photos/photo-1",
+		"--api-key", "test-key",
+		"--base-url", server.URL,
+	}, &stdout, &stderr)
+
+	if exitCode != 0 {
+		t.Fatalf("expected exit code 0, got %d", exitCode)
+	}
+	if !strings.Contains(stdout.String(), "photo.jpg") {
+		t.Fatalf("unexpected stdout: %s", stdout.String())
+	}
+	if stderr.Len() != 0 {
+		t.Fatalf("unexpected stderr: %s", stderr.String())
 	}
 }
 

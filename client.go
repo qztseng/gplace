@@ -83,7 +83,9 @@ func (c *Client) doRequest(
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-Goog-Api-Key", c.apiKey)
 	// Field masks trim API payloads and keep responses fast/cheap.
-	request.Header.Set("X-Goog-FieldMask", fieldMask)
+	if strings.TrimSpace(fieldMask) != "" {
+		request.Header.Set("X-Goog-FieldMask", fieldMask)
+	}
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {

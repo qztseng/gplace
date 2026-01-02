@@ -108,6 +108,7 @@ type PlaceDetails struct {
 	Hours      []string `json:"hours,omitempty"`
 	OpenNow    *bool    `json:"open_now,omitempty"`
 	Reviews    []Review `json:"reviews,omitempty"`
+	Photos     []Photo  `json:"photos,omitempty"`
 }
 
 // LocationResolveRequest resolves a text location into place candidates.
@@ -125,6 +126,8 @@ type DetailsRequest struct {
 	Region   string `json:"region,omitempty"`
 	// IncludeReviews requests the reviews field in Place Details.
 	IncludeReviews bool `json:"include_reviews,omitempty"`
+	// IncludePhotos requests the photos field in Place Details.
+	IncludePhotos bool `json:"include_photos,omitempty"`
 }
 
 // Review represents a user review of a place.
@@ -159,6 +162,27 @@ type ReviewVisitDate struct {
 	Year  int `json:"year,omitempty"`
 	Month int `json:"month,omitempty"`
 	Day   int `json:"day,omitempty"`
+}
+
+// Photo describes photo metadata for a place.
+type Photo struct {
+	Name               string              `json:"name,omitempty"`
+	WidthPx            int                 `json:"width_px,omitempty"`
+	HeightPx           int                 `json:"height_px,omitempty"`
+	AuthorAttributions []AuthorAttribution `json:"author_attributions,omitempty"`
+}
+
+// PhotoMediaRequest fetches a photo URL from a photo resource name.
+type PhotoMediaRequest struct {
+	Name        string `json:"name"`
+	MaxWidthPx  int    `json:"max_width_px,omitempty"`
+	MaxHeightPx int    `json:"max_height_px,omitempty"`
+}
+
+// PhotoMediaResponse contains the photo URL for a photo name.
+type PhotoMediaResponse struct {
+	Name     string `json:"name,omitempty"`
+	PhotoURI string `json:"photo_uri,omitempty"`
 }
 
 // LocationResolveResponse contains resolved locations.

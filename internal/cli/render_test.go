@@ -136,6 +136,9 @@ func TestRenderDetailsAndResolve(t *testing.T) {
 		Website:    "https://example.com",
 		Hours:      []string{"Mon: 9-5"},
 		OpenNow:    &open,
+		Photos: []goplaces.Photo{
+			{Name: "places/place-1/photos/photo-1", WidthPx: 1200, HeightPx: 800},
+		},
 		Reviews: []goplaces.Review{
 			{
 				Rating:                         floatPtr(4.5),
@@ -149,6 +152,9 @@ func TestRenderDetailsAndResolve(t *testing.T) {
 	if !strings.Contains(output, "Park") || !strings.Contains(output, "Hours:") {
 		t.Fatalf("unexpected details output: %s", output)
 	}
+	if !strings.Contains(output, "Photos:") {
+		t.Fatalf("missing photos output: %s", output)
+	}
 	if !strings.Contains(output, "Reviews:") || !strings.Contains(output, "Alice") {
 		t.Fatalf("missing reviews output: %s", output)
 	}
@@ -159,6 +165,19 @@ func TestRenderDetailsAndResolve(t *testing.T) {
 	outResolve := renderResolve(NewColor(false), resolve)
 	if !strings.Contains(outResolve, "Resolved") {
 		t.Fatalf("unexpected resolve output: %s", outResolve)
+	}
+}
+
+func TestRenderPhoto(t *testing.T) {
+	output := renderPhoto(NewColor(false), goplaces.PhotoMediaResponse{
+		Name:     "places/place-1/photos/photo-1",
+		PhotoURI: "https://example.com/photo.jpg",
+	})
+	if !strings.Contains(output, "Photo") {
+		t.Fatalf("missing photo header")
+	}
+	if !strings.Contains(output, "photo.jpg") {
+		t.Fatalf("missing photo uri")
 	}
 }
 

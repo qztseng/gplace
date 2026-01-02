@@ -18,6 +18,7 @@ type placeItem struct {
 	NationalPhoneNumber string              `json:"nationalPhoneNumber,omitempty"`
 	WebsiteURI          string              `json:"websiteUri,omitempty"`
 	Reviews             []reviewPayload     `json:"reviews,omitempty"`
+	Photos              []photoPayload      `json:"photos,omitempty"`
 }
 
 type displayNamePayload struct {
@@ -62,4 +63,11 @@ type visitDatePayload struct {
 	Year  int `json:"year,omitempty"`
 	Month int `json:"month,omitempty"`
 	Day   int `json:"day,omitempty"`
+}
+
+type photoPayload struct {
+	Name               string                     `json:"name,omitempty"`
+	WidthPx            int                        `json:"widthPx,omitempty"`
+	HeightPx           int                        `json:"heightPx,omitempty"`
+	AuthorAttributions []authorAttributionPayload `json:"authorAttributions,omitempty"`
 }

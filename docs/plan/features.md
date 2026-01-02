@@ -17,9 +17,9 @@
 - [x] Lint + coverage gate.
 
 ## Photos
-- [ ] Client: details photos + media URL endpoint.
-- [ ] CLI: `goplaces photo` flags + renderer.
-- [ ] Tests: client + CLI coverage.
-- [ ] E2E: details photos + photo media URL.
-- [ ] Docs: `docs/photos.md` + README update.
-- [ ] Lint + coverage gate.
+- [x] Client: details photos + media URL endpoint.
+- [x] CLI: `goplaces photo` flags + renderer.
+- [x] Tests: client + CLI coverage.
+- [x] E2E: details photos + photo media URL.
+- [x] Docs: `docs/photos.md` + README update.
+- [x] Lint + coverage gate.

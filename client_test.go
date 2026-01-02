@@ -330,6 +330,39 @@ func TestNearbySearchSuccess(t *testing.T) {
 	}
 }
 
+func TestPhotoMediaSuccess(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/v1/places/place-1/photos/photo-1/media" {
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+		query := r.URL.Query()
+		if query.Get("skipHttpRedirect") != "true" {
+			t.Fatalf("unexpected skipHttpRedirect: %s", query.Get("skipHttpRedirect"))
+		}
+		if query.Get("maxWidthPx") != "800" {
+			t.Fatalf("unexpected maxWidthPx: %s", query.Get("maxWidthPx"))
+		}
+		if query.Get("maxHeightPx") != "600" {
+			t.Fatalf("unexpected maxHeightPx: %s", query.Get("maxHeightPx"))
+		}
+		_, _ = w.Write([]byte(`{"name": "places/place-1/photos/photo-1", "photoUri": "https://example.com/photo.jpg"}`))
+	}))
+	defer server.Close()
+
+	client := NewClient(Options{APIKey: "test-key", BaseURL: server.URL + "/v1"})
+	response, err := client.PhotoMedia(context.Background(), PhotoMediaRequest{
+		Name:        "places/place-1/photos/photo-1",
+		MaxWidthPx:  800,
+		MaxHeightPx: 600,
+	})
+	if err != nil {
+		t.Fatalf("photo media error: %v", err)
+	}
+	if response.PhotoURI == "" {
+		t.Fatalf("expected photo uri")
+	}
+}
+
 func TestDetailsSuccess(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/v1/places/place-123" {
@@ -425,6 +458,45 @@ func TestDetailsWithReviews(t *testing.T) {
 	}
 }
 
+func TestDetailsWithPhotos(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("X-Goog-FieldMask"), "photos") {
+			t.Fatalf("expected photos in field mask: %s", r.Header.Get("X-Goog-FieldMask"))
+		}
+		_, _ = w.Write([]byte(`{
+  "id": "place-123",
+  "photos": [
+    {
+      "name": "places/place-123/photos/photo-1",
+      "widthPx": 1200,
+      "heightPx": 800,
+      "authorAttributions": [{"displayName": "Alice", "uri": "https://example.com"}]
+    }
+  ]
+}`))
+	}))
+	defer server.Close()
+
+	client := NewClient(Options{APIKey: "test-key", BaseURL: server.URL + "/v1"})
+	details, err := client.DetailsWithOptions(context.Background(), DetailsRequest{
+		PlaceID:       "place-123",
+		IncludePhotos: true,
+	})
+	if err != nil {
+		t.Fatalf("details error: %v", err)
+	}
+	if len(details.Photos) != 1 {
+		t.Fatalf("expected 1 photo")
+	}
+	photo := details.Photos[0]
+	if photo.Name == "" || photo.WidthPx != 1200 {
+		t.Fatalf("unexpected photo: %#v", photo)
+	}
+	if len(photo.AuthorAttributions) != 1 {
+		t.Fatalf("unexpected photo authors: %#v", photo.AuthorAttributions)
+	}
+}
+
 func TestDetailsFieldMaskForRequest(t *testing.T) {
 	req := DetailsRequest{}
 	if got := detailsFieldMaskForRequest(req); got != detailsFieldMaskBase {
@@ -434,6 +506,16 @@ func TestDetailsFieldMaskForRequest(t *testing.T) {
 	got := detailsFieldMaskForRequest(req)
 	if !strings.Contains(got, "reviews") {
 		t.Fatalf("expected reviews in field mask: %s", got)
+	}
+	req = DetailsRequest{IncludePhotos: true}
+	got = detailsFieldMaskForRequest(req)
+	if !strings.Contains(got, "photos") {
+		t.Fatalf("expected photos in field mask: %s", got)
+	}
+	req = DetailsRequest{IncludeReviews: true, IncludePhotos: true}
+	got = detailsFieldMaskForRequest(req)
+	if !strings.Contains(got, "reviews") || !strings.Contains(got, "photos") {
+		t.Fatalf("expected reviews and photos in field mask: %s", got)
 	}
 }
 
@@ -552,6 +634,11 @@ func TestValidationErrors(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatalf("expected nearby limit error")
+	}
+
+	_, err = client.PhotoMedia(context.Background(), PhotoMediaRequest{Name: ""})
+	if err == nil {
+		t.Fatalf("expected photo media name error")
 	}
 
 	_, err = client.Details(context.Background(), "")

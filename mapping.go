@@ -24,6 +24,22 @@ func mapReviews(reviews []reviewPayload) []Review {
 	return mapped
 }
 
+func mapPhotos(photos []photoPayload) []Photo {
+	if len(photos) == 0 {
+		return nil
+	}
+	mapped := make([]Photo, 0, len(photos))
+	for _, photo := range photos {
+		mapped = append(mapped, Photo{
+			Name:               photo.Name,
+			WidthPx:            photo.WidthPx,
+			HeightPx:           photo.HeightPx,
+			AuthorAttributions: mapAuthorAttributions(photo.AuthorAttributions),
+		})
+	}
+	return mapped
+}
+
 func mapLocalizedText(text *localizedTextPayload) *LocalizedText {
 	if text == nil {
 		return nil
@@ -51,6 +67,17 @@ func mapAuthorAttribution(author *authorAttributionPayload) *AuthorAttribution {
 		URI:         author.URI,
 		PhotoURI:    author.PhotoURI,
 	}
+}
+
+func mapAuthorAttributions(authors []authorAttributionPayload) []AuthorAttribution {
+	if len(authors) == 0 {
+		return nil
+	}
+	mapped := make([]AuthorAttribution, 0, len(authors))
+	for _, author := range authors {
+		mapped = append(mapped, AuthorAttribution(author))
+	}
+	return mapped
 }
 
 func mapVisitDate(date *visitDatePayload) *ReviewVisitDate {

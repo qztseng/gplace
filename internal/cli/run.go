@@ -247,6 +247,7 @@ func (c *DetailsCmd) Run(app *App) error {
 		Language:       c.Language,
 		Region:         c.Region,
 		IncludeReviews: c.Reviews,
+		IncludePhotos:  c.Photos,
 	})
 	if err != nil {
 		return err
@@ -257,6 +258,25 @@ func (c *DetailsCmd) Run(app *App) error {
 	}
 
 	_, err = fmt.Fprintln(app.out, renderDetails(app.color, response))
+	return err
+}
+
+// Run executes the photo command.
+func (c *PhotoCmd) Run(app *App) error {
+	response, err := app.client.PhotoMedia(context.Background(), goplaces.PhotoMediaRequest{
+		Name:        c.Name,
+		MaxWidthPx:  c.MaxWidthPx,
+		MaxHeightPx: c.MaxHeightPx,
+	})
+	if err != nil {
+		return err
+	}
+
+	if app.json {
+		return writeJSON(app.out, response)
+	}
+
+	_, err = fmt.Fprintln(app.out, renderPhoto(app.color, response))
 	return err
 }
 

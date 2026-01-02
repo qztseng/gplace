@@ -148,6 +148,61 @@ func TestE2ENearbySearch(t *testing.T) {
 	}
 }
 
+func TestE2EPhotoMedia(t *testing.T) {
+	apiKey := os.Getenv("GOOGLE_PLACES_API_KEY")
+	if apiKey == "" {
+		t.Skip("GOOGLE_PLACES_API_KEY not set")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	client := NewClient(Options{
+		APIKey:  apiKey,
+		BaseURL: os.Getenv("GOOGLE_PLACES_E2E_BASE_URL"),
+		Timeout: 10 * time.Second,
+	})
+
+	placeID := os.Getenv("GOOGLE_PLACES_E2E_PHOTO_PLACE_ID")
+	if placeID == "" {
+		query := os.Getenv("GOOGLE_PLACES_E2E_PHOTO_QUERY")
+		if query == "" {
+			query = "Space Needle Seattle"
+		}
+		search, err := client.Search(ctx, SearchRequest{Query: query, Limit: 1})
+		if err != nil {
+			t.Fatalf("photo search error: %v", err)
+		}
+		if len(search.Results) == 0 {
+			t.Fatalf("expected photo search results")
+		}
+		placeID = search.Results[0].PlaceID
+	}
+
+	details, err := client.DetailsWithOptions(ctx, DetailsRequest{
+		PlaceID:       placeID,
+		IncludePhotos: true,
+	})
+	if err != nil {
+		t.Fatalf("photo details error: %v", err)
+	}
+	if len(details.Photos) == 0 {
+		t.Skip("no photos available for e2e place")
+	}
+
+	photo := details.Photos[0]
+	response, err := client.PhotoMedia(ctx, PhotoMediaRequest{
+		Name:       photo.Name,
+		MaxWidthPx: 800,
+	})
+	if err != nil {
+		t.Fatalf("photo media error: %v", err)
+	}
+	if response.PhotoURI == "" {
+		t.Fatalf("expected photo uri")
+	}
+}
+
 func envFloat(key string, fallback float64) float64 {
 	value := os.Getenv(key)
 	if value == "" {

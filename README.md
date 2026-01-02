@@ -7,6 +7,7 @@ Modern Go client + CLI for the Google Places API (New). Fast for humans, tidy fo
 - Text search with filters: keyword, type, open now, min rating, price levels.
 - Autocomplete suggestions for places + queries (session tokens supported).
 - Nearby search around a location restriction.
+- Place photos in details + photo media URLs.
 - Location bias (lat/lng/radius) and pagination tokens.
 - Place details: hours, phone, website, rating, price, types.
 - Optional reviews in details (`--reviews` / `IncludeReviews`).
@@ -72,6 +73,7 @@ Commands:
   nearby        Search nearby places by location.
   search   Search places by text query.
   details  Fetch place details by place ID.
+  photo    Fetch a photo URL by photo name.
   resolve  Resolve a location string to candidate places.
 ```
 
@@ -104,6 +106,18 @@ Details (with reviews):
 
 ```bash
 goplaces details ChIJN1t_tDeuEmsRUsoyG83frY4 --reviews
+```
+
+Details (with photos):
+
+```bash
+goplaces details ChIJN1t_tDeuEmsRUsoyG83frY4 --photos
+```
+
+Photo URL:
+
+```bash
+goplaces photo "places/PLACE_ID/photos/PHOTO_ID" --max-width 1200
 ```
 
 Resolve:
@@ -162,6 +176,11 @@ nearby, err := client.NearbySearch(ctx, goplaces.NearbySearchRequest{
     IncludedTypes:       []string{"cafe"},
     Limit:               5,
 })
+
+photo, err := client.PhotoMedia(ctx, goplaces.PhotoMediaRequest{
+    Name:       "places/PLACE_ID/photos/PHOTO_ID",
+    MaxWidthPx: 1200,
+})
 ```
 
 ## Notes
@@ -169,6 +188,7 @@ nearby, err := client.NearbySearch(ctx, goplaces.NearbySearchRequest{
 - `Filters.Types` maps to `includedType` (Google accepts a single value). Only the first type is sent.
 - Price levels map to Google enums: `0` (free) → `4` (very expensive).
 - Reviews are returned only when `IncludeReviews`/`--reviews` is set.
+- Photos are returned only when `IncludePhotos`/`--photos` is set.
 - Field masks are defined alongside each request (e.g. `search.go`, `details.go`, `autocomplete.go`).
 - The Places API is billed and quota-limited; keep an eye on your Cloud Console quotas.
 

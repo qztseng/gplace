@@ -83,6 +83,15 @@ func renderNearby(color Color, response goplaces.NearbySearchResponse) string {
 	return out.String()
 }
 
+func renderPhoto(color Color, response goplaces.PhotoMediaResponse) string {
+	var out bytes.Buffer
+	out.WriteString(color.Bold("Photo"))
+	out.WriteString("\n")
+	writeLine(&out, color, "Name", response.Name)
+	writeLine(&out, color, "URL", response.PhotoURI)
+	return out.String()
+}
+
 func renderDetails(color Color, place goplaces.PlaceDetails) string {
 	var out bytes.Buffer
 	out.WriteString(color.Bold(formatTitle(color, place.Name, place.Address)))
@@ -166,6 +175,7 @@ func writePlaceDetails(out *bytes.Buffer, color Color, place goplaces.PlaceDetai
 	writeOpenNow(out, color, place.OpenNow)
 	writeLine(out, color, "Phone", place.Phone)
 	writeLine(out, color, "Website", place.Website)
+	writePhotos(out, color, place.Photos)
 	writeReviews(out, color, place.Reviews)
 	if len(place.Hours) > 0 {
 		out.WriteString(color.Dim("Hours:"))
@@ -182,6 +192,37 @@ func writeResolvedLocation(out *bytes.Buffer, color Color, place goplaces.Resolv
 	writeLine(out, color, "ID", place.PlaceID)
 	writeLocation(out, color, place.Location)
 	writeTypes(out, color, place.Types)
+}
+
+func writePhotos(out *bytes.Buffer, color Color, photos []goplaces.Photo) {
+	if len(photos) == 0 {
+		return
+	}
+	out.WriteString(color.Dim("Photos:"))
+	out.WriteString("\n")
+
+	const maxPhotos = 3
+	count := len(photos)
+	limit := count
+	if count > maxPhotos {
+		limit = maxPhotos
+	}
+
+	for i := 0; i < limit; i++ {
+		photo := photos[i]
+		line := photoLine(photo)
+		if line == "" {
+			continue
+		}
+		out.WriteString("  - ")
+		out.WriteString(line)
+		out.WriteString("\n")
+	}
+
+	if count > maxPhotos {
+		out.WriteString(color.Dim(fmt.Sprintf("  ... %d more", count-maxPhotos)))
+		out.WriteString("\n")
+	}
 }
 
 func writeReviews(out *bytes.Buffer, color Color, reviews []goplaces.Review) {
@@ -282,6 +323,20 @@ func reviewLine(review goplaces.Review) string {
 		parts = append(parts, text)
 	}
 	return strings.Join(parts, " ")
+}
+
+func photoLine(photo goplaces.Photo) string {
+	parts := make([]string, 0, 3)
+	if strings.TrimSpace(photo.Name) != "" {
+		parts = append(parts, photo.Name)
+	}
+	if photo.WidthPx > 0 && photo.HeightPx > 0 {
+		parts = append(parts, fmt.Sprintf("%dx%d", photo.WidthPx, photo.HeightPx))
+	}
+	if len(photo.AuthorAttributions) > 0 && strings.TrimSpace(photo.AuthorAttributions[0].DisplayName) != "" {
+		parts = append(parts, "by "+photo.AuthorAttributions[0].DisplayName)
+	}
+	return strings.Join(parts, " · ")
 }
 
 func reviewText(review goplaces.Review) string {
