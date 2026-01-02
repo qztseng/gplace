@@ -34,7 +34,7 @@ goplaces search "coffee" --min-rating 4 --open-now --limit 5 \
 Details:
 
 ```bash
-goplaces details ChIJN1t_tDeuEmsRUsoyG83frY4
+goplaces details ChIJN1t_tDeuEmsRUsoyG83frY4 --reviews
 ```
 
 Resolve:
@@ -81,6 +81,13 @@ resp, err := client.Search(ctx, goplaces.SearchRequest{
     LocationBias: &goplaces.LocationBias{Lat: 40.8065, Lng: -73.9719, RadiusM: 3000},
     Limit: 10,
 })
+
+details, err := client.DetailsWithOptions(ctx, goplaces.DetailsRequest{
+    PlaceID:        "ChIJN1t_tDeuEmsRUsoyG83frY4",
+    Language:       "en",
+    Region:         "US",
+    IncludeReviews: true,
+})
 ```
 
 ## Notes
@@ -88,6 +95,7 @@ resp, err := client.Search(ctx, goplaces.SearchRequest{
 - `Filters.Types` maps to `includedType` (Google supports a single value). Only the first type is sent.
 - Price levels map to Google enums: `0` (free) → `4` (very expensive).
 - Use `GOOGLE_PLACES_BASE_URL` to override the endpoint (useful for tests).
+- Reviews are returned only when `IncludeReviews`/`--reviews` is set.
 - Field masks are defined in `client.go` constants; extend them if you need more fields.
 - Google Places API usage is billed and quota-limited; keep an eye on your Cloud Console quotas.
 

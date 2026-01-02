@@ -64,6 +64,7 @@ type PlaceDetails struct {
 	Website    string   `json:"website,omitempty"`
 	Hours      []string `json:"hours,omitempty"`
 	OpenNow    *bool    `json:"open_now,omitempty"`
+	Reviews    []Review `json:"reviews,omitempty"`
 }
 
 // LocationResolveRequest resolves a text location into place candidates.
@@ -79,6 +80,42 @@ type DetailsRequest struct {
 	PlaceID  string `json:"place_id"`
 	Language string `json:"language,omitempty"`
 	Region   string `json:"region,omitempty"`
+	// IncludeReviews requests the reviews field in Place Details.
+	IncludeReviews bool `json:"include_reviews,omitempty"`
+}
+
+// Review represents a user review of a place.
+type Review struct {
+	Name                           string             `json:"name,omitempty"`
+	RelativePublishTimeDescription string             `json:"relative_publish_time_description,omitempty"`
+	Text                           *LocalizedText     `json:"text,omitempty"`
+	OriginalText                   *LocalizedText     `json:"original_text,omitempty"`
+	Rating                         *float64           `json:"rating,omitempty"`
+	Author                         *AuthorAttribution `json:"author,omitempty"`
+	PublishTime                    string             `json:"publish_time,omitempty"`
+	FlagContentURI                 string             `json:"flag_content_uri,omitempty"`
+	GoogleMapsURI                  string             `json:"google_maps_uri,omitempty"`
+	VisitDate                      *ReviewVisitDate   `json:"visit_date,omitempty"`
+}
+
+// LocalizedText is a text value with an optional language code.
+type LocalizedText struct {
+	Text         string `json:"text,omitempty"`
+	LanguageCode string `json:"language_code,omitempty"`
+}
+
+// AuthorAttribution describes a review author.
+type AuthorAttribution struct {
+	DisplayName string `json:"display_name,omitempty"`
+	URI         string `json:"uri,omitempty"`
+	PhotoURI    string `json:"photo_uri,omitempty"`
+}
+
+// ReviewVisitDate describes the date a reviewer visited a place.
+type ReviewVisitDate struct {
+	Year  int `json:"year,omitempty"`
+	Month int `json:"month,omitempty"`
+	Day   int `json:"day,omitempty"`
 }
 
 // LocationResolveResponse contains resolved locations.

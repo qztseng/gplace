@@ -175,9 +175,10 @@ func (c *SearchCmd) Run(app *App) error {
 // Run executes the details command.
 func (c *DetailsCmd) Run(app *App) error {
 	response, err := app.client.DetailsWithOptions(context.Background(), goplaces.DetailsRequest{
-		PlaceID:  c.PlaceID,
-		Language: c.Language,
-		Region:   c.Region,
+		PlaceID:        c.PlaceID,
+		Language:       c.Language,
+		Region:         c.Region,
+		IncludeReviews: c.Reviews,
 	})
 	if err != nil {
 		return err

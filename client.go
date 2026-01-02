@@ -25,9 +25,10 @@ const (
 )
 
 const (
-	searchFieldMask  = "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.currentOpeningHours,nextPageToken"
-	detailsFieldMask = "id,displayName,formattedAddress,location,rating,priceLevel,types,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri"
-	resolveFieldMask = "places.id,places.displayName,places.formattedAddress,places.location,places.types"
+	searchFieldMask        = "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.currentOpeningHours,nextPageToken"
+	detailsFieldMaskBase   = "id,displayName,formattedAddress,location,rating,priceLevel,types,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri"
+	detailsFieldMaskReview = "reviews"
+	resolveFieldMask       = "places.id,places.displayName,places.formattedAddress,places.location,places.types"
 )
 
 const (
@@ -145,7 +146,7 @@ func (c *Client) DetailsWithOptions(ctx context.Context, req DetailsRequest) (Pl
 		return PlaceDetails{}, err
 	}
 
-	payload, err := c.doRequest(ctx, http.MethodGet, endpoint, nil, detailsFieldMask)
+	payload, err := c.doRequest(ctx, http.MethodGet, endpoint, nil, detailsFieldMaskForRequest(req))
 	if err != nil {
 		return PlaceDetails{}, err
 	}
@@ -334,6 +335,13 @@ func buildSearchBody(req SearchRequest) map[string]any {
 	return body
 }
 
+func detailsFieldMaskForRequest(req DetailsRequest) string {
+	if req.IncludeReviews {
+		return detailsFieldMaskBase + "," + detailsFieldMaskReview
+	}
+	return detailsFieldMaskBase
+}
+
 func mapPlaceSummary(place placeItem) PlaceSummary {
 	return PlaceSummary{
 		PlaceID:    place.ID,
@@ -360,6 +368,7 @@ func mapPlaceDetails(place placeItem) PlaceDetails {
 		Website:    place.WebsiteURI,
 		Hours:      weekdayDescriptions(place.RegularOpeningHours),
 		OpenNow:    openNow(place.CurrentOpeningHours),
+		Reviews:    mapReviews(place.Reviews),
 	}
 }
 
@@ -370,6 +379,69 @@ func mapResolvedLocation(place placeItem) ResolvedLocation {
 		Address:  place.FormattedAddress,
 		Location: mapLatLng(place.Location),
 		Types:    place.Types,
+	}
+}
+
+func mapReviews(reviews []reviewPayload) []Review {
+	if len(reviews) == 0 {
+		return nil
+	}
+	mapped := make([]Review, 0, len(reviews))
+	for _, review := range reviews {
+		mapped = append(mapped, Review{
+			Name:                           review.Name,
+			RelativePublishTimeDescription: review.RelativePublishTimeDescription,
+			Text:                           mapLocalizedText(review.Text),
+			OriginalText:                   mapLocalizedText(review.OriginalText),
+			Rating:                         review.Rating,
+			Author:                         mapAuthorAttribution(review.AuthorAttribution),
+			PublishTime:                    review.PublishTime,
+			FlagContentURI:                 review.FlagContentURI,
+			GoogleMapsURI:                  review.GoogleMapsURI,
+			VisitDate:                      mapVisitDate(review.VisitDate),
+		})
+	}
+	return mapped
+}
+
+func mapLocalizedText(text *localizedTextPayload) *LocalizedText {
+	if text == nil {
+		return nil
+	}
+	if strings.TrimSpace(text.Text) == "" && strings.TrimSpace(text.LanguageCode) == "" {
+		return nil
+	}
+	return &LocalizedText{
+		Text:         text.Text,
+		LanguageCode: text.LanguageCode,
+	}
+}
+
+func mapAuthorAttribution(author *authorAttributionPayload) *AuthorAttribution {
+	if author == nil {
+		return nil
+	}
+	if strings.TrimSpace(author.DisplayName) == "" && strings.TrimSpace(author.URI) == "" && strings.TrimSpace(author.PhotoURI) == "" {
+		return nil
+	}
+	return &AuthorAttribution{
+		DisplayName: author.DisplayName,
+		URI:         author.URI,
+		PhotoURI:    author.PhotoURI,
+	}
+}
+
+func mapVisitDate(date *visitDatePayload) *ReviewVisitDate {
+	if date == nil {
+		return nil
+	}
+	if date.Year == 0 && date.Month == 0 && date.Day == 0 {
+		return nil
+	}
+	return &ReviewVisitDate{
+		Year:  date.Year,
+		Month: date.Month,
+		Day:   date.Day,
 	}
 }
 
@@ -498,6 +570,7 @@ type placeItem struct {
 	RegularOpeningHours *openingHours       `json:"regularOpeningHours,omitempty"`
 	NationalPhoneNumber string              `json:"nationalPhoneNumber,omitempty"`
 	WebsiteURI          string              `json:"websiteUri,omitempty"`
+	Reviews             []reviewPayload     `json:"reviews,omitempty"`
 }
 
 type displayNamePayload struct {
@@ -512,4 +585,34 @@ type location struct {
 type openingHours struct {
 	OpenNow             *bool    `json:"openNow,omitempty"`
 	WeekdayDescriptions []string `json:"weekdayDescriptions,omitempty"`
+}
+
+type reviewPayload struct {
+	Name                           string                    `json:"name,omitempty"`
+	RelativePublishTimeDescription string                    `json:"relativePublishTimeDescription,omitempty"`
+	Text                           *localizedTextPayload     `json:"text,omitempty"`
+	OriginalText                   *localizedTextPayload     `json:"originalText,omitempty"`
+	Rating                         *float64                  `json:"rating,omitempty"`
+	AuthorAttribution              *authorAttributionPayload `json:"authorAttribution,omitempty"`
+	PublishTime                    string                    `json:"publishTime,omitempty"`
+	FlagContentURI                 string                    `json:"flagContentUri,omitempty"`
+	GoogleMapsURI                  string                    `json:"googleMapsUri,omitempty"`
+	VisitDate                      *visitDatePayload         `json:"visitDate,omitempty"`
+}
+
+type localizedTextPayload struct {
+	Text         string `json:"text,omitempty"`
+	LanguageCode string `json:"languageCode,omitempty"`
+}
+
+type authorAttributionPayload struct {
+	DisplayName string `json:"displayName,omitempty"`
+	URI         string `json:"uri,omitempty"`
+	PhotoURI    string `json:"photoUri,omitempty"`
+}
+
+type visitDatePayload struct {
+	Year  int `json:"year,omitempty"`
+	Month int `json:"month,omitempty"`
+	Day   int `json:"day,omitempty"`
 }

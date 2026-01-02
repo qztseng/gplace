@@ -45,6 +45,7 @@ type DetailsCmd struct {
 	PlaceID  string `arg:"" name:"place_id" help:"Place ID."`
 	Language string `help:"BCP-47 language code (e.g. en, en-US)."`
 	Region   string `help:"CLDR region code (e.g. US, DE)."`
+	Reviews  bool   `help:"Include reviews in the response."`
 }
 
 // ResolveCmd resolves a location string into candidates.

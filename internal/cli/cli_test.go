@@ -146,6 +146,35 @@ func TestRunDetailsJSON(t *testing.T) {
 	}
 }
 
+func TestRunDetailsWithReviews(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("X-Goog-FieldMask"), "reviews") {
+			t.Fatalf("expected reviews in field mask: %s", r.Header.Get("X-Goog-FieldMask"))
+		}
+		_, _ = w.Write([]byte(`{"id": "place-1", "reviews": [{"name": "reviews/1"}]}`))
+	}))
+	defer server.Close()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	exitCode := Run([]string{
+		"details",
+		"place-1",
+		"--api-key", "test-key",
+		"--base-url", server.URL,
+		"--reviews",
+		"--json",
+	}, &stdout, &stderr)
+
+	if exitCode != 0 {
+		t.Fatalf("expected exit code 0, got %d", exitCode)
+	}
+	if !strings.Contains(stdout.String(), "\"reviews\"") {
+		t.Fatalf("unexpected stdout: %s", stdout.String())
+	}
+}
+
 func TestRunDetailsHuman(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(`{"id": "place-2", "displayName": {"text": "Park"}}`))

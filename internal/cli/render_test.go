@@ -83,10 +83,21 @@ func TestRenderDetailsAndResolve(t *testing.T) {
 		Website:    "https://example.com",
 		Hours:      []string{"Mon: 9-5"},
 		OpenNow:    &open,
+		Reviews: []goplaces.Review{
+			{
+				Rating:                         floatPtr(4.5),
+				RelativePublishTimeDescription: "2 weeks ago",
+				Text:                           &goplaces.LocalizedText{Text: "Great park"},
+				Author:                         &goplaces.AuthorAttribution{DisplayName: "Alice"},
+			},
+		},
 	}
 	output := renderDetails(NewColor(false), details)
 	if !strings.Contains(output, "Park") || !strings.Contains(output, "Hours:") {
 		t.Fatalf("unexpected details output: %s", output)
+	}
+	if !strings.Contains(output, "Reviews:") || !strings.Contains(output, "Alice") {
+		t.Fatalf("missing reviews output: %s", output)
 	}
 
 	resolve := goplaces.LocationResolveResponse{

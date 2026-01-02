@@ -90,6 +90,7 @@ func writePlaceDetails(out *bytes.Buffer, color Color, place goplaces.PlaceDetai
 	writeOpenNow(out, color, place.OpenNow)
 	writeLine(out, color, "Phone", place.Phone)
 	writeLine(out, color, "Website", place.Website)
+	writeReviews(out, color, place.Reviews)
 	if len(place.Hours) > 0 {
 		out.WriteString(color.Dim("Hours:"))
 		out.WriteString("\n")
@@ -105,6 +106,37 @@ func writeResolvedLocation(out *bytes.Buffer, color Color, place goplaces.Resolv
 	writeLine(out, color, "ID", place.PlaceID)
 	writeLocation(out, color, place.Location)
 	writeTypes(out, color, place.Types)
+}
+
+func writeReviews(out *bytes.Buffer, color Color, reviews []goplaces.Review) {
+	if len(reviews) == 0 {
+		return
+	}
+	out.WriteString(color.Dim("Reviews:"))
+	out.WriteString("\n")
+
+	const maxReviews = 3
+	count := len(reviews)
+	limit := count
+	if count > maxReviews {
+		limit = maxReviews
+	}
+
+	for i := 0; i < limit; i++ {
+		review := reviews[i]
+		line := reviewLine(review)
+		if line == "" {
+			continue
+		}
+		out.WriteString("  - ")
+		out.WriteString(line)
+		out.WriteString("\n")
+	}
+
+	if count > maxReviews {
+		out.WriteString(color.Dim(fmt.Sprintf("  ... %d more", count-maxReviews)))
+		out.WriteString("\n")
+	}
 }
 
 func writeLocation(out *bytes.Buffer, color Color, loc *goplaces.LatLng) {
@@ -155,6 +187,45 @@ func writeLine(out *bytes.Buffer, color Color, label string, value string) {
 	out.WriteString(" ")
 	out.WriteString(value)
 	out.WriteString("\n")
+}
+
+func reviewLine(review goplaces.Review) string {
+	parts := make([]string, 0, 3)
+	if review.Rating != nil {
+		parts = append(parts, fmt.Sprintf("%.1f stars", *review.Rating))
+	}
+	if review.Author != nil && strings.TrimSpace(review.Author.DisplayName) != "" {
+		parts = append(parts, "by "+review.Author.DisplayName)
+	}
+	if strings.TrimSpace(review.RelativePublishTimeDescription) != "" {
+		parts = append(parts, "("+review.RelativePublishTimeDescription+")")
+	}
+	text := reviewText(review)
+	if text != "" {
+		parts = append(parts, text)
+	}
+	return strings.Join(parts, " ")
+}
+
+func reviewText(review goplaces.Review) string {
+	text := ""
+	if review.Text != nil {
+		text = review.Text.Text
+	}
+	if strings.TrimSpace(text) == "" && review.OriginalText != nil {
+		text = review.OriginalText.Text
+	}
+	return truncateText(strings.TrimSpace(text), 200)
+}
+
+func truncateText(value string, maxLen int) string {
+	if maxLen <= 0 || value == "" {
+		return value
+	}
+	if len(value) <= maxLen {
+		return value
+	}
+	return strings.TrimSpace(value[:maxLen]) + "..."
 }
 
 func uniqueStrings(values []string) []string {
