@@ -1,6 +1,7 @@
 .PHONY: lint test coverage
 
 lint:
+	golangci-lint fmt
 	golangci-lint run ./...
 
 test:

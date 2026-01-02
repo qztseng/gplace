@@ -118,6 +118,8 @@ func (c *SearchCmd) Run(app *App) error {
 		Query:     c.Query,
 		Limit:     c.Limit,
 		PageToken: c.PageToken,
+		Language:  c.Language,
+		Region:    c.Region,
 	}
 
 	filters := goplaces.Filters{}
@@ -172,7 +174,11 @@ func (c *SearchCmd) Run(app *App) error {
 
 // Run executes the details command.
 func (c *DetailsCmd) Run(app *App) error {
-	response, err := app.client.Details(context.Background(), c.PlaceID)
+	response, err := app.client.DetailsWithOptions(context.Background(), goplaces.DetailsRequest{
+		PlaceID:  c.PlaceID,
+		Language: c.Language,
+		Region:   c.Region,
+	})
 	if err != nil {
 		return err
 	}
@@ -190,6 +196,8 @@ func (c *ResolveCmd) Run(app *App) error {
 	request := goplaces.LocationResolveRequest{
 		LocationText: c.LocationText,
 		Limit:        c.Limit,
+		Language:     c.Language,
+		Region:       c.Region,
 	}
 
 	response, err := app.client.Resolve(context.Background(), request)

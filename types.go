@@ -7,6 +7,8 @@ type SearchRequest struct {
 	LocationBias *LocationBias `json:"location_bias,omitempty"`
 	Limit        int           `json:"limit,omitempty"`
 	PageToken    string        `json:"page_token,omitempty"`
+	Language     string        `json:"language,omitempty"`
+	Region       string        `json:"region,omitempty"`
 }
 
 // Filters are optional search refinements.
@@ -68,6 +70,15 @@ type PlaceDetails struct {
 type LocationResolveRequest struct {
 	LocationText string `json:"location_text"`
 	Limit        int    `json:"limit,omitempty"`
+	Language     string `json:"language,omitempty"`
+	Region       string `json:"region,omitempty"`
+}
+
+// DetailsRequest fetches place details with optional locale hints.
+type DetailsRequest struct {
+	PlaceID  string `json:"place_id"`
+	Language string `json:"language,omitempty"`
+	Region   string `json:"region,omitempty"`
 }
 
 // LocationResolveResponse contains resolved locations.

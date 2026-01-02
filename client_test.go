@@ -65,6 +65,8 @@ func TestSearchSuccess(t *testing.T) {
 		Query:     "coffee",
 		Limit:     5,
 		PageToken: "token",
+		Language:  "en",
+		Region:    "US",
 		Filters: &Filters{
 			Keyword:     "best",
 			Types:       []string{"cafe"},
@@ -108,6 +110,12 @@ func TestSearchSuccess(t *testing.T) {
 	if gotRequest["pageToken"] != "token" {
 		t.Fatalf("unexpected pageToken: %#v", gotRequest["pageToken"])
 	}
+	if gotRequest["languageCode"] != "en" {
+		t.Fatalf("unexpected languageCode: %#v", gotRequest["languageCode"])
+	}
+	if gotRequest["regionCode"] != "US" {
+		t.Fatalf("unexpected regionCode: %#v", gotRequest["regionCode"])
+	}
 }
 
 func TestSearchHTTPError(t *testing.T) {
@@ -146,6 +154,12 @@ func TestDetailsSuccess(t *testing.T) {
 		if r.URL.Path != "/v1/places/place-123" {
 			t.Fatalf("unexpected path: %s", r.URL.Path)
 		}
+		if r.URL.Query().Get("languageCode") != "en" {
+			t.Fatalf("unexpected languageCode: %s", r.URL.Query().Get("languageCode"))
+		}
+		if r.URL.Query().Get("regionCode") != "US" {
+			t.Fatalf("unexpected regionCode: %s", r.URL.Query().Get("regionCode"))
+		}
 		if r.Header.Get("X-Goog-FieldMask") != detailsFieldMask {
 			t.Fatalf("unexpected field mask: %s", r.Header.Get("X-Goog-FieldMask"))
 		}
@@ -166,7 +180,11 @@ func TestDetailsSuccess(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient(Options{APIKey: "test-key", BaseURL: server.URL + "/v1"})
-	place, err := client.Details(context.Background(), "place-123")
+	place, err := client.DetailsWithOptions(context.Background(), DetailsRequest{
+		PlaceID:  "place-123",
+		Language: "en",
+		Region:   "US",
+	})
 	if err != nil {
 		t.Fatalf("details error: %v", err)
 	}
@@ -182,9 +200,17 @@ func TestDetailsSuccess(t *testing.T) {
 }
 
 func TestResolveSuccess(t *testing.T) {
+	var gotRequest map[string]any
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-Goog-FieldMask") != resolveFieldMask {
 			t.Fatalf("unexpected field mask: %s", r.Header.Get("X-Goog-FieldMask"))
+		}
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatalf("read body: %v", err)
+		}
+		if err := json.Unmarshal(body, &gotRequest); err != nil {
+			t.Fatalf("decode body: %v", err)
 		}
 		_, _ = w.Write([]byte(`{
   "places": [
@@ -201,12 +227,22 @@ func TestResolveSuccess(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient(Options{APIKey: "test-key", BaseURL: server.URL})
-	response, err := client.Resolve(context.Background(), LocationResolveRequest{LocationText: "Downtown"})
+	response, err := client.Resolve(context.Background(), LocationResolveRequest{
+		LocationText: "Downtown",
+		Language:     "en",
+		Region:       "US",
+	})
 	if err != nil {
 		t.Fatalf("resolve error: %v", err)
 	}
 	if len(response.Results) != 1 {
 		t.Fatalf("expected 1 result")
+	}
+	if gotRequest["languageCode"] != "en" {
+		t.Fatalf("unexpected languageCode: %#v", gotRequest["languageCode"])
+	}
+	if gotRequest["regionCode"] != "US" {
+		t.Fatalf("unexpected regionCode: %#v", gotRequest["regionCode"])
 	}
 }
 

@@ -28,7 +28,7 @@ Search:
 
 ```bash
 goplaces search "coffee" --min-rating 4 --open-now --limit 5 \
-  --lat 40.8065 --lng -73.9719 --radius-m 3000
+  --lat 40.8065 --lng -73.9719 --radius-m 3000 --language en --region US
 ```
 
 Details:
@@ -88,6 +88,8 @@ resp, err := client.Search(ctx, goplaces.SearchRequest{
 - `Filters.Types` maps to `includedType` (Google supports a single value). Only the first type is sent.
 - Price levels map to Google enums: `0` (free) → `4` (very expensive).
 - Use `GOOGLE_PLACES_BASE_URL` to override the endpoint (useful for tests).
+- Field masks are defined in `client.go` constants; extend them if you need more fields.
+- Google Places API usage is billed and quota-limited; keep an eye on your Cloud Console quotas.
 
 ## Testing
 

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -32,7 +33,7 @@ func TestRunSearchJSON(t *testing.T) {
 	}, &stdout, &stderr)
 
 	if exitCode != 0 {
-		t.Fatalf("expected exit code 0, got %d", exitCode)
+		t.Fatalf("expected exit code 0, got %d (stdout=%s stderr=%s)", exitCode, stdout.String(), stderr.String())
 	}
 	if stderr.Len() != 0 {
 		t.Fatalf("unexpected stderr: %s", stderr.String())
@@ -59,9 +60,60 @@ func TestRunSearchHuman(t *testing.T) {
 	}, &stdout, &stderr)
 
 	if exitCode != 0 {
-		t.Fatalf("expected exit code 0, got %d", exitCode)
+		t.Fatalf("expected exit code 0, got %d (stdout=%s stderr=%s)", exitCode, stdout.String(), stderr.String())
 	}
 	if !strings.Contains(stdout.String(), "Cafe") {
+		t.Fatalf("unexpected stdout: %s", stdout.String())
+	}
+}
+
+func TestRunSearchWithFilters(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var payload map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Fatalf("decode request: %v", err)
+		}
+		if payload["includedType"] != "cafe" {
+			t.Fatalf("unexpected includedType: %#v", payload["includedType"])
+		}
+		if payload["languageCode"] != "en" {
+			t.Fatalf("unexpected languageCode: %#v", payload["languageCode"])
+		}
+		if payload["regionCode"] != "US" {
+			t.Fatalf("unexpected regionCode: %#v", payload["regionCode"])
+		}
+		_, _ = w.Write([]byte(`{"places": [{"id": "abc"}]}`))
+	}))
+	defer server.Close()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	exitCode := Run([]string{
+		"search",
+		"coffee",
+		"--api-key", "test-key",
+		"--base-url", server.URL,
+		"--json",
+		"--keyword", "best",
+		"--type", "cafe",
+		"--open-now=true",
+		"--min-rating", "4.2",
+		"--price-level", "1",
+		"--lat", "40.0",
+		"--lng=-70.0",
+		"--radius-m", "500",
+		"--language", "en",
+		"--region", "US",
+	}, &stdout, &stderr)
+
+	if exitCode != 0 {
+		t.Fatalf("expected exit code 0, got %d (stdout=%s stderr=%s)", exitCode, stdout.String(), stderr.String())
+	}
+	if stderr.Len() != 0 {
+		t.Fatalf("unexpected stderr: %s", stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "\"results\"") {
 		t.Fatalf("unexpected stdout: %s", stdout.String())
 	}
 }

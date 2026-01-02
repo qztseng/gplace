@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -99,7 +100,11 @@ func (c *Client) Search(ctx context.Context, req SearchRequest) (SearchResponse,
 	}
 
 	body := buildSearchBody(req)
-	payload, err := c.doRequest(ctx, http.MethodPost, "/places:searchText", body, searchFieldMask)
+	endpoint, err := c.buildURL("/places:searchText", nil)
+	if err != nil {
+		return SearchResponse{}, err
+	}
+	payload, err := c.doRequest(ctx, http.MethodPost, endpoint, body, searchFieldMask)
 	if err != nil {
 		return SearchResponse{}, err
 	}
@@ -122,13 +127,25 @@ func (c *Client) Search(ctx context.Context, req SearchRequest) (SearchResponse,
 
 // Details fetches details for a specific place ID.
 func (c *Client) Details(ctx context.Context, placeID string) (PlaceDetails, error) {
-	placeID = strings.TrimSpace(placeID)
+	return c.DetailsWithOptions(ctx, DetailsRequest{PlaceID: placeID})
+}
+
+// DetailsWithOptions fetches place details with locale hints.
+func (c *Client) DetailsWithOptions(ctx context.Context, req DetailsRequest) (PlaceDetails, error) {
+	placeID := strings.TrimSpace(req.PlaceID)
 	if placeID == "" {
 		return PlaceDetails{}, ValidationError{Field: "place_id", Message: "required"}
 	}
 
-	path := "/places/" + placeID
-	payload, err := c.doRequest(ctx, http.MethodGet, path, nil, detailsFieldMask)
+	endpoint, err := c.buildURL("/places/"+placeID, map[string]string{
+		"languageCode": strings.TrimSpace(req.Language),
+		"regionCode":   strings.TrimSpace(req.Region),
+	})
+	if err != nil {
+		return PlaceDetails{}, err
+	}
+
+	payload, err := c.doRequest(ctx, http.MethodGet, endpoint, nil, detailsFieldMask)
 	if err != nil {
 		return PlaceDetails{}, err
 	}
@@ -152,8 +169,18 @@ func (c *Client) Resolve(ctx context.Context, req LocationResolveRequest) (Locat
 		"textQuery": req.LocationText,
 		"pageSize":  req.Limit,
 	}
+	if strings.TrimSpace(req.Language) != "" {
+		body["languageCode"] = strings.TrimSpace(req.Language)
+	}
+	if strings.TrimSpace(req.Region) != "" {
+		body["regionCode"] = strings.TrimSpace(req.Region)
+	}
 
-	payload, err := c.doRequest(ctx, http.MethodPost, "/places:searchText", body, resolveFieldMask)
+	endpoint, err := c.buildURL("/places:searchText", nil)
+	if err != nil {
+		return LocationResolveResponse{}, err
+	}
+	payload, err := c.doRequest(ctx, http.MethodPost, endpoint, body, resolveFieldMask)
 	if err != nil {
 		return LocationResolveResponse{}, err
 	}
@@ -174,7 +201,7 @@ func (c *Client) Resolve(ctx context.Context, req LocationResolveRequest) (Locat
 func (c *Client) doRequest(
 	ctx context.Context,
 	method string,
-	path string,
+	endpoint string,
 	body any,
 	fieldMask string,
 ) ([]byte, error) {
@@ -182,7 +209,6 @@ func (c *Client) doRequest(
 		return nil, ErrMissingAPIKey
 	}
 
-	url := c.baseURL + path
 	var reader io.Reader
 	if body != nil {
 		payload, err := json.Marshal(body)
@@ -192,7 +218,7 @@ func (c *Client) doRequest(
 		reader = bytes.NewReader(payload)
 	}
 
-	request, err := http.NewRequestWithContext(ctx, method, url, reader)
+	request, err := http.NewRequestWithContext(ctx, method, endpoint, reader)
 	if err != nil {
 		return nil, fmt.Errorf("goplaces: build request: %w", err)
 	}
@@ -226,6 +252,28 @@ func (c *Client) doRequest(
 	return payload, nil
 }
 
+func (c *Client) buildURL(path string, query map[string]string) (string, error) {
+	endpoint := c.baseURL + path
+	if len(query) == 0 {
+		return endpoint, nil
+	}
+
+	parsed, err := url.Parse(endpoint)
+	if err != nil {
+		return "", fmt.Errorf("goplaces: invalid url: %w", err)
+	}
+
+	values := parsed.Query()
+	for key, value := range query {
+		if strings.TrimSpace(value) == "" {
+			continue
+		}
+		values.Set(key, value)
+	}
+	parsed.RawQuery = values.Encode()
+	return parsed.String(), nil
+}
+
 func buildSearchBody(req SearchRequest) map[string]any {
 	textQuery := req.Query
 	if req.Filters != nil && strings.TrimSpace(req.Filters.Keyword) != "" {
@@ -235,6 +283,12 @@ func buildSearchBody(req SearchRequest) map[string]any {
 	body := map[string]any{
 		"textQuery": textQuery,
 		"pageSize":  req.Limit,
+	}
+	if strings.TrimSpace(req.Language) != "" {
+		body["languageCode"] = strings.TrimSpace(req.Language)
+	}
+	if strings.TrimSpace(req.Region) != "" {
+		body["regionCode"] = strings.TrimSpace(req.Region)
 	}
 
 	if req.PageToken != "" {
