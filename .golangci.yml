@@ -1,0 +1,42 @@
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - gocritic
+    - goconst
+    - gofmt
+    - gofumpt
+    - goimports
+    - misspell
+    - prealloc
+    - revive
+    - unparam
+
+linters-settings:
+  gofumpt:
+    extra-rules: true
+  goimports:
+    local-prefixes: github.com/steipete/goplaces
+  revive:
+    rules:
+      - name: early-return
+      - name: empty-lines
+      - name: errorf
+      - name: unexported-return
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - goconst
+        - dupl
+        - gosec
