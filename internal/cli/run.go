@@ -208,6 +208,38 @@ func (c *AutocompleteCmd) Run(app *App) error {
 	return err
 }
 
+// Run executes the nearby command.
+func (c *NearbyCmd) Run(app *App) error {
+	if c.Lat == nil || c.Lng == nil || c.RadiusM == nil {
+		return goplaces.ValidationError{Field: "location_restriction", Message: "lat, lng, radius required"}
+	}
+
+	request := goplaces.NearbySearchRequest{
+		LocationRestriction: &goplaces.LocationBias{
+			Lat:     *c.Lat,
+			Lng:     *c.Lng,
+			RadiusM: *c.RadiusM,
+		},
+		Limit:         c.Limit,
+		IncludedTypes: c.Type,
+		ExcludedTypes: c.ExcludeType,
+		Language:      c.Language,
+		Region:        c.Region,
+	}
+
+	response, err := app.client.NearbySearch(context.Background(), request)
+	if err != nil {
+		return err
+	}
+
+	if app.json {
+		return writeJSON(app.out, response)
+	}
+
+	_, err = fmt.Fprintln(app.out, renderNearby(app.color, response))
+	return err
+}
+
 // Run executes the details command.
 func (c *DetailsCmd) Run(app *App) error {
 	response, err := app.client.DetailsWithOptions(context.Background(), goplaces.DetailsRequest{

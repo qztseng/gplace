@@ -8,6 +8,7 @@ import (
 type Root struct {
 	Global       GlobalOptions   `embed:""`
 	Autocomplete AutocompleteCmd `cmd:"" help:"Autocomplete places and queries."`
+	Nearby       NearbyCmd       `cmd:"" help:"Search nearby places by location."`
 	Search       SearchCmd       `cmd:"" help:"Search places by text query."`
 	Details      DetailsCmd      `cmd:"" help:"Fetch place details by place ID."`
 	Resolve      ResolveCmd      `cmd:"" help:"Resolve a location string to candidate places."`
@@ -51,6 +52,18 @@ type AutocompleteCmd struct {
 	Lat          *float64 `help:"Latitude for location bias."`
 	Lng          *float64 `help:"Longitude for location bias."`
 	RadiusM      *float64 `help:"Radius in meters for location bias."`
+}
+
+// NearbyCmd runs nearby searches.
+type NearbyCmd struct {
+	Limit       int      `help:"Max results (1-20)." default:"10"`
+	Type        []string `help:"Included place types. Repeatable."`
+	ExcludeType []string `help:"Excluded place types. Repeatable."`
+	Language    string   `help:"BCP-47 language code (e.g. en, en-US)."`
+	Region      string   `help:"CLDR region code (e.g. US, DE)."`
+	Lat         *float64 `help:"Latitude for location restriction."`
+	Lng         *float64 `help:"Longitude for location restriction."`
+	RadiusM     *float64 `help:"Radius in meters for location restriction."`
 }
 
 // DetailsCmd fetches place details.

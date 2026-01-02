@@ -7,4 +7,6 @@ const (
 	maxResolveLimit          = 10
 	defaultAutocompleteLimit = 5
 	maxAutocompleteLimit     = 20
+	defaultNearbyLimit       = 10
+	maxNearbyLimit           = 20
 )

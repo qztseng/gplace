@@ -84,6 +84,25 @@ func TestRenderAutocompleteEmpty(t *testing.T) {
 	}
 }
 
+func TestRenderNearby(t *testing.T) {
+	response := goplaces.NearbySearchResponse{
+		Results: []goplaces.PlaceSummary{
+			{PlaceID: "place-1", Name: "Cafe"},
+		},
+		NextPageToken: "next",
+	}
+	output := renderNearby(NewColor(false), response)
+	if !strings.Contains(output, "Nearby") {
+		t.Fatalf("missing nearby header")
+	}
+	if !strings.Contains(output, "Cafe") {
+		t.Fatalf("missing place name")
+	}
+	if !strings.Contains(output, "next") {
+		t.Fatalf("missing next page token")
+	}
+}
+
 func TestFormatTitleFallback(t *testing.T) {
 	title := formatTitle(NewColor(false), "", "")
 	if !strings.Contains(title, "(no name)") {

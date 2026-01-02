@@ -9,12 +9,12 @@
 - [x] Lint + coverage gate.
 
 ## Nearby Search
-- [ ] Client: request/response types, validation, field mask.
-- [ ] CLI: `goplaces nearby` flags + renderer.
-- [ ] Tests: client + CLI coverage.
-- [ ] E2E: nearby search via API key.
-- [ ] Docs: `docs/nearby-search.md` + README update.
-- [ ] Lint + coverage gate.
+- [x] Client: request/response types, validation, field mask.
+- [x] CLI: `goplaces nearby` flags + renderer.
+- [x] Tests: client + CLI coverage.
+- [x] E2E: nearby search via API key.
+- [x] Docs: `docs/nearby-search.md` + README update.
+- [x] Lint + coverage gate.
 
 ## Photos
 - [ ] Client: details photos + media URL endpoint.

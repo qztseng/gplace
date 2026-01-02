@@ -6,6 +6,7 @@ Modern Go client + CLI for the Google Places API (New). Fast for humans, tidy fo
 
 - Text search with filters: keyword, type, open now, min rating, price levels.
 - Autocomplete suggestions for places + queries (session tokens supported).
+- Nearby search around a location restriction.
 - Location bias (lat/lng/radius) and pagination tokens.
 - Place details: hours, phone, website, rating, price, types.
 - Optional reviews in details (`--reviews` / `IncludeReviews`).
@@ -68,6 +69,7 @@ goplaces [--api-key=KEY] [--base-url=URL] [--timeout=10s] [--json] [--no-color] 
 
 Commands:
   autocomplete  Autocomplete places and queries.
+  nearby        Search nearby places by location.
   search   Search places by text query.
   details  Fetch place details by place ID.
   resolve  Resolve a location string to candidate places.
@@ -90,6 +92,12 @@ Autocomplete:
 
 ```bash
 goplaces autocomplete "cof" --session-token "goplaces-demo" --limit 5 --language en --region US
+```
+
+Nearby search:
+
+```bash
+goplaces nearby --lat 47.6062 --lng -122.3321 --radius-m 1500 --type cafe --limit 5
 ```
 
 Details (with reviews):
@@ -147,6 +155,12 @@ autocomplete, err := client.Autocomplete(ctx, goplaces.AutocompleteRequest{
     Limit:        5,
     Language:     "en",
     Region:       "US",
+})
+
+nearby, err := client.NearbySearch(ctx, goplaces.NearbySearchRequest{
+    LocationRestriction: &goplaces.LocationBias{Lat: 47.6062, Lng: -122.3321, RadiusM: 1500},
+    IncludedTypes:       []string{"cafe"},
+    Limit:               5,
 })
 ```
 

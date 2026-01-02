@@ -56,6 +56,33 @@ func renderAutocomplete(color Color, response goplaces.AutocompleteResponse) str
 	return out.String()
 }
 
+func renderNearby(color Color, response goplaces.NearbySearchResponse) string {
+	var out bytes.Buffer
+	count := len(response.Results)
+	if count == 0 {
+		return emptyResultsMessage
+	}
+	out.WriteString(color.Bold(fmt.Sprintf("Nearby (%d)", count)))
+	out.WriteString("\n")
+
+	for i, place := range response.Results {
+		out.WriteString(fmt.Sprintf("%d. %s\n", i+1, formatTitle(color, place.Name, place.Address)))
+		writePlaceSummary(&out, color, place)
+		if i < count-1 {
+			out.WriteString("\n")
+		}
+	}
+
+	if strings.TrimSpace(response.NextPageToken) != "" {
+		out.WriteString("\n")
+		out.WriteString(color.Dim("Next page token:"))
+		out.WriteString(" ")
+		out.WriteString(response.NextPageToken)
+	}
+
+	return out.String()
+}
+
 func renderDetails(color Color, place goplaces.PlaceDetails) string {
 	var out bytes.Buffer
 	out.WriteString(color.Bold(formatTitle(color, place.Name, place.Address)))

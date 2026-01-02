@@ -66,6 +66,22 @@ type AutocompleteSuggestion struct {
 	DistanceMeters *int     `json:"distance_meters,omitempty"`
 }
 
+// NearbySearchRequest defines a nearby search query.
+type NearbySearchRequest struct {
+	LocationRestriction *LocationBias `json:"location_restriction,omitempty"`
+	Limit               int           `json:"limit,omitempty"`
+	IncludedTypes       []string      `json:"included_types,omitempty"`
+	ExcludedTypes       []string      `json:"excluded_types,omitempty"`
+	Language            string        `json:"language,omitempty"`
+	Region              string        `json:"region,omitempty"`
+}
+
+// NearbySearchResponse contains nearby search results.
+type NearbySearchResponse struct {
+	Results       []PlaceSummary `json:"results"`
+	NextPageToken string         `json:"next_page_token,omitempty"`
+}
+
 // PlaceSummary is a compact view of a place.
 type PlaceSummary struct {
 	PlaceID    string   `json:"place_id"`
