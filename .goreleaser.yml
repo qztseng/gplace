@@ -8,13 +8,13 @@ builds:
     binary: goplaces
     env:
       - CGO_ENABLED=0
-    goos:
-      - darwin
-      - linux
-      - windows
-    goarch:
-      - amd64
-      - arm64
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+      - windows_amd64
+      - windows_arm64
     ldflags:
       - -s -w -X github.com/steipete/goplaces/internal/cli.Version={{.Version}}
 
