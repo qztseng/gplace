@@ -1,5 +1,5 @@
 .PHONY: lint test coverage
-.PHONY: e2e goplaces
+.PHONY: e2e goplaces force
 
 lint:
 	golangci-lint fmt
@@ -14,5 +14,7 @@ coverage:
 e2e:
 	go test -tags=e2e ./... -run TestE2E
 
-goplaces:
+goplaces: force
 	go build -o goplaces ./cmd/goplaces
+
+force:
