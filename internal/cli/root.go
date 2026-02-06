@@ -12,7 +12,6 @@ type Root struct {
 	Search       SearchCmd       `cmd:"" help:"Search places by text query."`
 	Route        RouteCmd        `cmd:"" help:"Search places along a route."`
 	Details      DetailsCmd      `cmd:"" help:"Fetch place details by place ID."`
-	Photo        PhotoCmd        `cmd:"" help:"Fetch a photo URL by photo name."`
 	Resolve      ResolveCmd      `cmd:"" help:"Resolve a location string to candidate places."`
 }
 
@@ -75,14 +74,6 @@ type DetailsCmd struct {
 	Language string `help:"BCP-47 language code (e.g. en, en-US)."`
 	Region   string `help:"CLDR region code (e.g. US, DE)."`
 	Reviews  bool   `help:"Include reviews in the response."`
-	Photos   bool   `help:"Include photos in the response."`
-}
-
-// PhotoCmd fetches a photo URL.
-type PhotoCmd struct {
-	Name        string `arg:"" name:"photo_name" help:"Photo resource name (places/.../photos/...)."`
-	MaxWidthPx  int    `help:"Max width in pixels." name:"max-width"`
-	MaxHeightPx int    `help:"Max height in pixels." name:"max-height"`
 }
 
 // ResolveCmd resolves a location string into candidates.

@@ -5,7 +5,7 @@ Nearby search finds places around a specific location restriction.
 ## CLI
 
 ```bash
-goplaces nearby --lat 47.6062 --lng -122.3321 --radius-m 1500 \
+gplace nearby --lat 47.6062 --lng -122.3321 --radius-m 1500 \
   --type cafe --type bakery \
   --limit 5
 ```
@@ -13,15 +13,15 @@ goplaces nearby --lat 47.6062 --lng -122.3321 --radius-m 1500 \
 Exclude types:
 
 ```bash
-goplaces nearby --lat 47.6062 --lng -122.3321 --radius-m 1500 \
+gplace nearby --lat 47.6062 --lng -122.3321 --radius-m 1500 \
   --exclude-type bar
 ```
 
 ## Library
 
 ```go
-response, err := client.NearbySearch(ctx, goplaces.NearbySearchRequest{
-    LocationRestriction: &goplaces.LocationBias{Lat: 47.6062, Lng: -122.3321, RadiusM: 1500},
+response, err := client.NearbySearch(ctx, gplace.NearbySearchRequest{
+    LocationRestriction: &gplace.LocationBias{Lat: 47.6062, Lng: -122.3321, RadiusM: 1500},
     Limit:               5,
     IncludedTypes:       []string{"cafe"},
     ExcludedTypes:       []string{"bar"},

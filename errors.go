@@ -1,9 +1,9 @@
-package goplaces
+package gplace
 
 import "fmt"
 
 // ErrMissingAPIKey indicates a missing API key.
-var ErrMissingAPIKey = fmt.Errorf("goplaces: missing api key")
+var ErrMissingAPIKey = fmt.Errorf("gplace: missing api key")
 
 // ValidationError describes an invalid request payload.
 type ValidationError struct {
@@ -12,7 +12,7 @@ type ValidationError struct {
 }
 
 func (e ValidationError) Error() string {
-	return fmt.Sprintf("goplaces: invalid %s: %s", e.Field, e.Message)
+	return fmt.Sprintf("gplace: invalid %s: %s", e.Field, e.Message)
 }
 
 // APIError represents an HTTP error from the Places API.
@@ -23,7 +23,7 @@ type APIError struct {
 
 func (e *APIError) Error() string {
 	if e.Body == "" {
-		return fmt.Sprintf("goplaces: api error (%d)", e.StatusCode)
+		return fmt.Sprintf("gplace: api error (%d)", e.StatusCode)
 	}
-	return fmt.Sprintf("goplaces: api error (%d): %s", e.StatusCode, e.Body)
+	return fmt.Sprintf("gplace: api error (%d): %s", e.StatusCode, e.Body)
 }

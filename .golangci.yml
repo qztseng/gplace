@@ -28,7 +28,7 @@ formatters-settings:
   gofumpt:
     extra-rules: true
   goimports:
-    local-prefixes: github.com/steipete/goplaces
+    local-prefixes: github.com/qztseng/gplace
 
 linters-settings:
   revive:

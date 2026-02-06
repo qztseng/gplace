@@ -1,11 +1,11 @@
-// Package main implements the goplaces CLI entrypoint.
+// Package main implements the gplace CLI entrypoint.
 package main
 
 import (
 	"io"
 	"os"
 
-	"github.com/steipete/goplaces/internal/cli"
+	"github.com/qztseng/gplace/internal/cli"
 )
 
 var exit = os.Exit

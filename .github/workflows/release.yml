@@ -25,6 +25,6 @@ jobs:
           args: build --clean
       - uses: actions/upload-artifact@v4
         with:
-          name: goplaces-${{ github.ref_name }}
+          name: gplace-${{ github.ref_name }}
           path: dist/**
           if-no-files-found: error

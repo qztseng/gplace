@@ -1,7 +1,7 @@
 //go:build e2e
 // +build e2e
 
-package goplaces
+package gplace
 
 import (
 	"context"
@@ -104,7 +104,7 @@ func TestE2EAutocomplete(t *testing.T) {
 		Limit:        3,
 		Language:     language,
 		Region:       region,
-		SessionToken: "goplaces-e2e",
+		SessionToken: "gplace-e2e",
 	})
 	if err != nil {
 		t.Fatalf("autocomplete error: %v", err)

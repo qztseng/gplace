@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 import (
 	"context"
@@ -44,7 +44,7 @@ func (c *Client) Autocomplete(ctx context.Context, req AutocompleteRequest) (Aut
 
 	var response autocompleteResponsePayload
 	if err := json.Unmarshal(payload, &response); err != nil {
-		return AutocompleteResponse{}, fmt.Errorf("goplaces: decode autocomplete response: %w", err)
+		return AutocompleteResponse{}, fmt.Errorf("gplace: decode autocomplete response: %w", err)
 	}
 
 	suggestions := make([]AutocompleteSuggestion, 0, len(response.Suggestions))

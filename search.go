@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const searchFieldMask = "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.currentOpeningHours,nextPageToken"
+const searchFieldMask = "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.priceLevel,places.types,places.currentOpeningHours,nextPageToken"
 
 // Search performs a text search with optional filters.
 func (c *Client) Search(ctx context.Context, req SearchRequest) (SearchResponse, error) {
@@ -29,7 +29,7 @@ func (c *Client) Search(ctx context.Context, req SearchRequest) (SearchResponse,
 
 	var response searchResponse
 	if err := json.Unmarshal(payload, &response); err != nil {
-		return SearchResponse{}, fmt.Errorf("goplaces: decode search response: %w", err)
+		return SearchResponse{}, fmt.Errorf("gplace: decode search response: %w", err)
 	}
 
 	results := make([]PlaceSummary, 0, len(response.Places))
@@ -100,14 +100,15 @@ func buildSearchBody(req SearchRequest) map[string]any {
 
 func mapPlaceSummary(place placeItem) PlaceSummary {
 	return PlaceSummary{
-		PlaceID:    place.ID,
-		Name:       displayName(place.DisplayName),
-		Address:    place.FormattedAddress,
-		Location:   mapLatLng(place.Location),
-		Rating:     place.Rating,
-		PriceLevel: mapPriceLevel(place.PriceLevel),
-		Types:      place.Types,
-		OpenNow:    openNow(place.CurrentOpeningHours),
+		PlaceID:         place.ID,
+		Name:            displayName(place.DisplayName),
+		Address:         place.FormattedAddress,
+		Location:        mapLatLng(place.Location),
+		Rating:          place.Rating,
+		UserRatingCount: place.UserRatingCount,
+		PriceLevel:      mapPriceLevel(place.PriceLevel),
+		Types:           place.Types,
+		OpenNow:         openNow(place.CurrentOpeningHours),
 	}
 }
 

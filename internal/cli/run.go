@@ -9,12 +9,12 @@ import (
 	"os"
 
 	"github.com/alecthomas/kong"
-	"github.com/steipete/goplaces"
+	"github.com/qztseng/gplace"
 )
 
 // App wires CLI output and API access.
 type App struct {
-	client *goplaces.Client
+	client *gplace.Client
 	out    io.Writer
 	err    io.Writer
 	json   bool
@@ -34,7 +34,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 	exitCode := 0
 	parser, err := kong.New(
 		&root,
-		kong.Name("goplaces"),
+		kong.Name("gplace"),
 		kong.Description("Search and resolve places via the Google Places API (New)."),
 		kong.UsageOnError(),
 		kong.ConfigureHelp(kong.HelpOptions{Compact: true, Summary: true}),
@@ -68,7 +68,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 		root.Global.NoColor = true
 	}
 
-	client := goplaces.NewClient(goplaces.Options{
+	client := gplace.NewClient(gplace.Options{
 		APIKey:        root.Global.APIKey,
 		BaseURL:       root.Global.BaseURL,
 		RoutesBaseURL: root.Global.RoutesBaseURL,
@@ -117,7 +117,7 @@ func parseWithExit(parser *kong.Kong, args []string, exitCode *int) (ctx *kong.C
 
 // Run executes the search command.
 func (c *SearchCmd) Run(app *App) error {
-	request := goplaces.SearchRequest{
+	request := gplace.SearchRequest{
 		Query:     c.Query,
 		Limit:     c.Limit,
 		PageToken: c.PageToken,
@@ -125,7 +125,7 @@ func (c *SearchCmd) Run(app *App) error {
 		Region:    c.Region,
 	}
 
-	filters := goplaces.Filters{}
+	filters := gplace.Filters{}
 	setFilters := false
 	if c.Keyword != "" {
 		filters.Keyword = c.Keyword
@@ -153,9 +153,9 @@ func (c *SearchCmd) Run(app *App) error {
 
 	if c.Lat != nil || c.Lng != nil || c.RadiusM != nil {
 		if c.Lat == nil || c.Lng == nil || c.RadiusM == nil {
-			return goplaces.ValidationError{Field: "location_bias", Message: "lat, lng, radius required"}
+			return gplace.ValidationError{Field: "location_bias", Message: "lat, lng, radius required"}
 		}
-		request.LocationBias = &goplaces.LocationBias{
+		request.LocationBias = &gplace.LocationBias{
 			Lat:     *c.Lat,
 			Lng:     *c.Lng,
 			RadiusM: *c.RadiusM,
@@ -183,7 +183,7 @@ func (c *SearchCmd) Run(app *App) error {
 
 // Run executes the autocomplete command.
 func (c *AutocompleteCmd) Run(app *App) error {
-	request := goplaces.AutocompleteRequest{
+	request := gplace.AutocompleteRequest{
 		Input:        c.Input,
 		Limit:        c.Limit,
 		SessionToken: c.SessionToken,
@@ -193,9 +193,9 @@ func (c *AutocompleteCmd) Run(app *App) error {
 
 	if c.Lat != nil || c.Lng != nil || c.RadiusM != nil {
 		if c.Lat == nil || c.Lng == nil || c.RadiusM == nil {
-			return goplaces.ValidationError{Field: "location_bias", Message: "lat, lng, radius required"}
+			return gplace.ValidationError{Field: "location_bias", Message: "lat, lng, radius required"}
 		}
-		request.LocationBias = &goplaces.LocationBias{
+		request.LocationBias = &gplace.LocationBias{
 			Lat:     *c.Lat,
 			Lng:     *c.Lng,
 			RadiusM: *c.RadiusM,
@@ -218,11 +218,11 @@ func (c *AutocompleteCmd) Run(app *App) error {
 // Run executes the nearby command.
 func (c *NearbyCmd) Run(app *App) error {
 	if c.Lat == nil || c.Lng == nil || c.RadiusM == nil {
-		return goplaces.ValidationError{Field: "location_restriction", Message: "lat, lng, radius required"}
+		return gplace.ValidationError{Field: "location_restriction", Message: "lat, lng, radius required"}
 	}
 
-	request := goplaces.NearbySearchRequest{
-		LocationRestriction: &goplaces.LocationBias{
+	request := gplace.NearbySearchRequest{
+		LocationRestriction: &gplace.LocationBias{
 			Lat:     *c.Lat,
 			Lng:     *c.Lng,
 			RadiusM: *c.RadiusM,
@@ -255,12 +255,11 @@ func (c *NearbyCmd) Run(app *App) error {
 
 // Run executes the details command.
 func (c *DetailsCmd) Run(app *App) error {
-	response, err := app.client.DetailsWithOptions(context.Background(), goplaces.DetailsRequest{
+	response, err := app.client.DetailsWithOptions(context.Background(), gplace.DetailsRequest{
 		PlaceID:        c.PlaceID,
 		Language:       c.Language,
 		Region:         c.Region,
 		IncludeReviews: c.Reviews,
-		IncludePhotos:  c.Photos,
 	})
 	if err != nil {
 		return err
@@ -274,28 +273,9 @@ func (c *DetailsCmd) Run(app *App) error {
 	return err
 }
 
-// Run executes the photo command.
-func (c *PhotoCmd) Run(app *App) error {
-	response, err := app.client.PhotoMedia(context.Background(), goplaces.PhotoMediaRequest{
-		Name:        c.Name,
-		MaxWidthPx:  c.MaxWidthPx,
-		MaxHeightPx: c.MaxHeightPx,
-	})
-	if err != nil {
-		return err
-	}
-
-	if app.json {
-		return writeJSON(app.out, response)
-	}
-
-	_, err = fmt.Fprintln(app.out, renderPhoto(app.color, response))
-	return err
-}
-
 // Run executes the resolve command.
 func (c *ResolveCmd) Run(app *App) error {
-	request := goplaces.LocationResolveRequest{
+	request := gplace.LocationResolveRequest{
 		LocationText: c.LocationText,
 		Limit:        c.Limit,
 		Language:     c.Language,
@@ -328,12 +308,12 @@ func handleError(writer io.Writer, err error) int {
 	if err == nil {
 		return 0
 	}
-	var validation goplaces.ValidationError
+	var validation gplace.ValidationError
 	if errors.As(err, &validation) {
 		_, _ = fmt.Fprintln(writer, validation.Error())
 		return 2
 	}
-	if errors.Is(err, goplaces.ErrMissingAPIKey) {
+	if errors.Is(err, gplace.ErrMissingAPIKey) {
 		_, _ = fmt.Fprintln(writer, err.Error())
 		return 2
 	}

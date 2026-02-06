@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 import (
 	"context"
@@ -9,9 +9,8 @@ import (
 )
 
 const (
-	detailsFieldMaskBase   = "id,displayName,formattedAddress,location,rating,priceLevel,types,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri"
+	detailsFieldMaskBase   = "id,displayName,formattedAddress,location,rating,userRatingCount,priceLevel,priceRange,types,primaryType,primaryTypeDisplayName,businessStatus,googleMapsUri,editorialSummary,generativeSummary,reviewSummary,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri,servesBeer,servesBreakfast,servesBrunch,servesCocktails,servesCoffee,servesDessert,servesDinner,servesLunch,servesVegetarianFood,servesWine"
 	detailsFieldMaskReview = "reviews"
-	detailsFieldMaskPhotos = "photos"
 )
 
 // Details fetches details for a specific place ID.
@@ -41,7 +40,7 @@ func (c *Client) DetailsWithOptions(ctx context.Context, req DetailsRequest) (Pl
 
 	var place placeItem
 	if err := json.Unmarshal(payload, &place); err != nil {
-		return PlaceDetails{}, fmt.Errorf("goplaces: decode place details: %w", err)
+		return PlaceDetails{}, fmt.Errorf("gplace: decode place details: %w", err)
 	}
 
 	return mapPlaceDetails(place), nil
@@ -53,26 +52,41 @@ func detailsFieldMaskForRequest(req DetailsRequest) string {
 		// Reviews are heavy; opt-in to include them.
 		fields = append(fields, detailsFieldMaskReview)
 	}
-	if req.IncludePhotos {
-		fields = append(fields, detailsFieldMaskPhotos)
-	}
 	return strings.Join(fields, ",")
 }
 
 func mapPlaceDetails(place placeItem) PlaceDetails {
 	return PlaceDetails{
-		PlaceID:    place.ID,
-		Name:       displayName(place.DisplayName),
-		Address:    place.FormattedAddress,
-		Location:   mapLatLng(place.Location),
-		Rating:     place.Rating,
-		PriceLevel: mapPriceLevel(place.PriceLevel),
-		Types:      place.Types,
-		Phone:      place.NationalPhoneNumber,
-		Website:    place.WebsiteURI,
-		Hours:      weekdayDescriptions(place.RegularOpeningHours),
-		OpenNow:    openNow(place.CurrentOpeningHours),
-		Reviews:    mapReviews(place.Reviews),
-		Photos:     mapPhotos(place.Photos),
+		PlaceID:                place.ID,
+		Name:                   displayName(place.DisplayName),
+		Address:                place.FormattedAddress,
+		Location:               mapLatLng(place.Location),
+		Rating:                 place.Rating,
+		UserRatingCount:        place.UserRatingCount,
+		PriceLevel:             mapPriceLevel(place.PriceLevel),
+		PriceRange:             mapPriceRange(place.PriceRange),
+		BusinessStatus:         place.BusinessStatus,
+		GoogleMapsURI:          place.GoogleMapsURI,
+		PrimaryType:            place.PrimaryType,
+		PrimaryTypeDisplayName: mapText(place.PrimaryTypeDisplayName),
+		EditorialSummary:       mapText(place.EditorialSummary),
+		GenerativeSummary:      mapGenerativeSummary(place.GenerativeSummary),
+		ReviewSummary:          mapReviewSummary(place.ReviewSummary),
+		Types:                  place.Types,
+		Phone:                  place.NationalPhoneNumber,
+		Website:                place.WebsiteURI,
+		Hours:                  weekdayDescriptions(place.RegularOpeningHours),
+		OpenNow:                openNow(place.CurrentOpeningHours),
+		Reviews:                mapReviews(place.Reviews),
+		ServesBeer:             place.ServesBeer,
+		ServesBreakfast:        place.ServesBreakfast,
+		ServesBrunch:           place.ServesBrunch,
+		ServesCocktails:        place.ServesCocktails,
+		ServesCoffee:           place.ServesCoffee,
+		ServesDessert:          place.ServesDessert,
+		ServesDinner:           place.ServesDinner,
+		ServesLunch:            place.ServesLunch,
+		ServesVegetarianFood:   place.ServesVegetarianFood,
+		ServesWine:             place.ServesWine,
 	}
 }

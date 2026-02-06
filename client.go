@@ -1,5 +1,5 @@
-// Package goplaces provides a Go client for the Google Places API (New).
-package goplaces
+// Package gplace provides a Go client for the Google Places API (New).
+package gplace
 
 import (
 	"bytes"
@@ -77,14 +77,14 @@ func (c *Client) doRequest(
 	if body != nil {
 		payload, err := json.Marshal(body)
 		if err != nil {
-			return nil, fmt.Errorf("goplaces: encode request: %w", err)
+			return nil, fmt.Errorf("gplace: encode request: %w", err)
 		}
 		reader = bytes.NewReader(payload)
 	}
 
 	request, err := http.NewRequestWithContext(ctx, method, endpoint, reader)
 	if err != nil {
-		return nil, fmt.Errorf("goplaces: build request: %w", err)
+		return nil, fmt.Errorf("gplace: build request: %w", err)
 	}
 
 	request.Header.Set("Content-Type", "application/json")
@@ -96,7 +96,7 @@ func (c *Client) doRequest(
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {
-		return nil, fmt.Errorf("goplaces: request failed: %w", err)
+		return nil, fmt.Errorf("gplace: request failed: %w", err)
 	}
 	defer func() {
 		_ = response.Body.Close()
@@ -105,7 +105,7 @@ func (c *Client) doRequest(
 	// Hard-cap payload size to avoid runaway error bodies.
 	payload, err := io.ReadAll(io.LimitReader(response.Body, 1<<20))
 	if err != nil {
-		return nil, fmt.Errorf("goplaces: read response: %w", err)
+		return nil, fmt.Errorf("gplace: read response: %w", err)
 	}
 
 	if response.StatusCode >= http.StatusBadRequest {
@@ -114,7 +114,7 @@ func (c *Client) doRequest(
 	}
 
 	if len(payload) == 0 {
-		return nil, errors.New("goplaces: empty response")
+		return nil, errors.New("gplace: empty response")
 	}
 
 	return payload, nil
@@ -128,7 +128,7 @@ func (c *Client) buildURL(path string, query map[string]string) (string, error) 
 
 	parsed, err := url.Parse(endpoint)
 	if err != nil {
-		return "", fmt.Errorf("goplaces: invalid url: %w", err)
+		return "", fmt.Errorf("gplace: invalid url: %w", err)
 	}
 
 	values := parsed.Query()

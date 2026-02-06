@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/steipete/goplaces/internal/cli"
+	"github.com/qztseng/gplace/internal/cli"
 )
 
 func TestRunVersion(t *testing.T) {
@@ -35,7 +35,7 @@ func TestMain(t *testing.T) {
 
 	var gotCode int
 	exit = func(code int) { gotCode = code }
-	os.Args = []string{"goplaces", "--version"}
+	os.Args = []string{"gplace", "--version"}
 
 	main()
 	if gotCode != 0 {

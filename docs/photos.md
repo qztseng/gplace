@@ -5,24 +5,24 @@ Photos support includes metadata on Place Details and a helper to fetch a photo 
 ## Details (metadata)
 
 ```bash
-goplaces details "PLACE_ID" --photos
+gplace details "PLACE_ID" --photos
 ```
 
 ## Photo URL
 
 ```bash
-goplaces photo "places/PLACE_ID/photos/PHOTO_ID" --max-width 1200
+gplace photo "places/PLACE_ID/photos/PHOTO_ID" --max-width 1200
 ```
 
 ## Library
 
 ```go
-details, err := client.DetailsWithOptions(ctx, goplaces.DetailsRequest{
+details, err := client.DetailsWithOptions(ctx, gplace.DetailsRequest{
     PlaceID:       "PLACE_ID",
     IncludePhotos: true,
 })
 
-photo, err := client.PhotoMedia(ctx, goplaces.PhotoMediaRequest{
+photo, err := client.PhotoMedia(ctx, gplace.PhotoMediaRequest{
     Name:       details.Photos[0].Name,
     MaxWidthPx: 1200,
 })

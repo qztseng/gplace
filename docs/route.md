@@ -5,7 +5,7 @@ Route search samples waypoints along a route and runs a text search at each wayp
 ## CLI
 
 ```bash
-goplaces route "coffee" --from "Seattle, WA" --to "Portland, OR" --max-waypoints 5
+gplace route "coffee" --from "Seattle, WA" --to "Portland, OR" --max-waypoints 5
 ```
 
 Options:
@@ -17,7 +17,7 @@ Options:
 ## Library
 
 ```go
-response, err := client.Route(ctx, goplaces.RouteRequest{
+response, err := client.Route(ctx, gplace.RouteRequest{
     Query:        "coffee",
     From:         "Seattle, WA",
     To:           "Portland, OR",

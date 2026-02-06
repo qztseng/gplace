@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 const (
 	defaultSearchLimit       = 10

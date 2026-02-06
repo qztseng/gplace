@@ -1,2 +1,2 @@
-// Package cli implements the goplaces command-line interface.
+// Package cli implements the gplace command-line interface.
 package cli

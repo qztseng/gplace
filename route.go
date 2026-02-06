@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 import (
 	"context"
@@ -85,7 +85,7 @@ func (c *Client) Route(ctx context.Context, req RouteRequest) (RouteResponse, er
 
 	waypoints := sampleWaypoints(points, req.MaxWaypoints)
 	if len(waypoints) == 0 {
-		return RouteResponse{}, errors.New("goplaces: no route waypoints")
+		return RouteResponse{}, errors.New("gplace: no route waypoints")
 	}
 
 	results := make([]RouteWaypoint, 0, len(waypoints))
@@ -185,21 +185,21 @@ func (c *Client) computeRoutePolyline(ctx context.Context, req RouteRequest) (st
 
 	var response routesResponse
 	if err := json.Unmarshal(payload, &response); err != nil {
-		return "", fmt.Errorf("goplaces: decode route response: %w", err)
+		return "", fmt.Errorf("gplace: decode route response: %w", err)
 	}
 	if len(response.Routes) == 0 {
-		return "", errors.New("goplaces: no routes returned")
+		return "", errors.New("gplace: no routes returned")
 	}
 	polyline := strings.TrimSpace(response.Routes[0].Polyline.EncodedPolyline)
 	if polyline == "" {
-		return "", errors.New("goplaces: empty route polyline")
+		return "", errors.New("gplace: empty route polyline")
 	}
 	return polyline, nil
 }
 
 func decodePolyline(encoded string) ([]LatLng, error) {
 	if strings.TrimSpace(encoded) == "" {
-		return nil, errors.New("goplaces: empty polyline")
+		return nil, errors.New("gplace: empty polyline")
 	}
 	points := make([]LatLng, 0, len(encoded)/4)
 	var lat, lng int
@@ -208,7 +208,7 @@ func decodePolyline(encoded string) ([]LatLng, error) {
 		var shift uint
 		for {
 			if i >= len(encoded) {
-				return nil, errors.New("goplaces: invalid polyline")
+				return nil, errors.New("gplace: invalid polyline")
 			}
 			b := int(encoded[i]) - 63
 			i++
@@ -224,7 +224,7 @@ func decodePolyline(encoded string) ([]LatLng, error) {
 		shift = 0
 		for {
 			if i >= len(encoded) {
-				return nil, errors.New("goplaces: invalid polyline")
+				return nil, errors.New("gplace: invalid polyline")
 			}
 			b := int(encoded[i]) - 63
 			i++

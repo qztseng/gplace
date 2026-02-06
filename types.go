@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 // SearchRequest defines a text search with optional filters.
 type SearchRequest struct {
@@ -84,31 +84,63 @@ type NearbySearchResponse struct {
 
 // PlaceSummary is a compact view of a place.
 type PlaceSummary struct {
-	PlaceID    string   `json:"place_id"`
-	Name       string   `json:"name,omitempty"`
-	Address    string   `json:"address,omitempty"`
-	Location   *LatLng  `json:"location,omitempty"`
-	Rating     *float64 `json:"rating,omitempty"`
-	PriceLevel *int     `json:"price_level,omitempty"`
-	Types      []string `json:"types,omitempty"`
-	OpenNow    *bool    `json:"open_now,omitempty"`
+	PlaceID         string   `json:"place_id"`
+	Name            string   `json:"name,omitempty"`
+	Address         string   `json:"address,omitempty"`
+	Location        *LatLng  `json:"location,omitempty"`
+	Rating          *float64 `json:"rating,omitempty"`
+	UserRatingCount *int     `json:"user_rating_count,omitempty"`
+	PriceLevel      *int     `json:"price_level,omitempty"`
+	Types           []string `json:"types,omitempty"`
+	OpenNow         *bool    `json:"open_now,omitempty"`
 }
 
 // PlaceDetails is a detailed view of a place.
 type PlaceDetails struct {
-	PlaceID    string   `json:"place_id"`
-	Name       string   `json:"name,omitempty"`
-	Address    string   `json:"address,omitempty"`
-	Location   *LatLng  `json:"location,omitempty"`
-	Rating     *float64 `json:"rating,omitempty"`
-	PriceLevel *int     `json:"price_level,omitempty"`
-	Types      []string `json:"types,omitempty"`
-	Phone      string   `json:"phone,omitempty"`
-	Website    string   `json:"website,omitempty"`
-	Hours      []string `json:"hours,omitempty"`
-	OpenNow    *bool    `json:"open_now,omitempty"`
-	Reviews    []Review `json:"reviews,omitempty"`
-	Photos     []Photo  `json:"photos,omitempty"`
+	PlaceID                string      `json:"place_id"`
+	Name                   string      `json:"name,omitempty"`
+	Address                string      `json:"address,omitempty"`
+	Location               *LatLng     `json:"location,omitempty"`
+	Rating                 *float64    `json:"rating,omitempty"`
+	UserRatingCount        *int        `json:"user_rating_count,omitempty"`
+	PriceLevel             *int        `json:"price_level,omitempty"`
+	PriceRange             *PriceRange `json:"price_range,omitempty"`
+	BusinessStatus         string      `json:"business_status,omitempty"`
+	GoogleMapsURI          string      `json:"google_maps_uri,omitempty"`
+	PrimaryType            string      `json:"primary_type,omitempty"`
+	PrimaryTypeDisplayName string      `json:"primary_type_display_name,omitempty"`
+	EditorialSummary       string      `json:"editorial_summary,omitempty"`
+	GenerativeSummary      string      `json:"generative_summary,omitempty"`
+	ReviewSummary          string      `json:"review_summary,omitempty"`
+	Types                  []string    `json:"types,omitempty"`
+	Phone                  string      `json:"phone,omitempty"`
+	Website                string      `json:"website,omitempty"`
+	Hours                  []string    `json:"hours,omitempty"`
+	OpenNow                *bool       `json:"open_now,omitempty"`
+	Reviews                []Review    `json:"reviews,omitempty"`
+	ServesBeer             *bool       `json:"serves_beer,omitempty"`
+	ServesBreakfast        *bool       `json:"serves_breakfast,omitempty"`
+	ServesBrunch           *bool       `json:"serves_brunch,omitempty"`
+	ServesCocktails        *bool       `json:"serves_cocktails,omitempty"`
+	ServesCoffee           *bool       `json:"serves_coffee,omitempty"`
+	ServesDessert          *bool       `json:"serves_dessert,omitempty"`
+	ServesDinner           *bool       `json:"serves_dinner,omitempty"`
+	ServesLunch            *bool       `json:"serves_lunch,omitempty"`
+	ServesVegetarianFood   *bool       `json:"serves_vegetarian_food,omitempty"`
+	ServesWine             *bool       `json:"serves_wine,omitempty"`
+}
+
+// PriceRange represents the price range of a place.
+type PriceRange struct {
+	StartPrice *Money `json:"start_price,omitempty"`
+	EndPrice   *Money `json:"end_price,omitempty"`
+}
+
+// Money represents an amount of money with its currency type.
+type Money struct {
+	CurrencyCode string `json:"currency_code"`
+	Units        int64  `json:"units"`
+	Nanos        int32  `json:"nanos"`
 }
 
 // LocationResolveRequest resolves a text location into place candidates.
@@ -126,8 +158,6 @@ type DetailsRequest struct {
 	Region   string `json:"region,omitempty"`
 	// IncludeReviews requests the reviews field in Place Details.
 	IncludeReviews bool `json:"include_reviews,omitempty"`
-	// IncludePhotos requests the photos field in Place Details.
-	IncludePhotos bool `json:"include_photos,omitempty"`
 }
 
 // Review represents a user review of a place.
@@ -164,28 +194,6 @@ type ReviewVisitDate struct {
 	Day   int `json:"day,omitempty"`
 }
 
-// Photo describes photo metadata for a place.
-type Photo struct {
-	Name               string              `json:"name,omitempty"`
-	WidthPx            int                 `json:"width_px,omitempty"`
-	HeightPx           int                 `json:"height_px,omitempty"`
-	AuthorAttributions []AuthorAttribution `json:"author_attributions,omitempty"`
-}
-
-// PhotoMediaRequest fetches a photo URL from a photo resource name.
-type PhotoMediaRequest struct {
-	Name        string `json:"name"`
-	MaxWidthPx  int    `json:"max_width_px,omitempty"`
-	MaxHeightPx int    `json:"max_height_px,omitempty"`
-}
-
-// PhotoMediaResponse contains the photo URL for a photo name.
-type PhotoMediaResponse struct {
-	Name     string `json:"name,omitempty"`
-	PhotoURI string `json:"photo_uri,omitempty"`
-}
-
-// LocationResolveResponse contains resolved locations.
 type LocationResolveResponse struct {
 	Results []ResolvedLocation `json:"results"`
 }

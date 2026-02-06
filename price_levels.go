@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 const (
 	priceLevelFree        = "PRICE_LEVEL_FREE"

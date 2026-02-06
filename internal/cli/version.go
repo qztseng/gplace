@@ -7,7 +7,7 @@ import (
 )
 
 // Version is the CLI version string (set by GoReleaser).
-var Version = "dev"
+var Version = "v0.3.0"
 
 // VersionFlag prints the version and exits.
 type VersionFlag string

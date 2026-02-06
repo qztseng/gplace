@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 type searchResponse struct {
 	Places        []placeItem `json:"places"`
@@ -6,19 +6,56 @@ type searchResponse struct {
 }
 
 type placeItem struct {
-	ID                  string              `json:"id"`
-	DisplayName         *displayNamePayload `json:"displayName,omitempty"`
-	FormattedAddress    string              `json:"formattedAddress,omitempty"`
-	Location            *location           `json:"location,omitempty"`
-	Rating              *float64            `json:"rating,omitempty"`
-	PriceLevel          string              `json:"priceLevel,omitempty"`
-	Types               []string            `json:"types,omitempty"`
-	CurrentOpeningHours *openingHours       `json:"currentOpeningHours,omitempty"`
-	RegularOpeningHours *openingHours       `json:"regularOpeningHours,omitempty"`
-	NationalPhoneNumber string              `json:"nationalPhoneNumber,omitempty"`
-	WebsiteURI          string              `json:"websiteUri,omitempty"`
-	Reviews             []reviewPayload     `json:"reviews,omitempty"`
-	Photos              []photoPayload      `json:"photos,omitempty"`
+	ID                     string                    `json:"id"`
+	DisplayName            *displayNamePayload       `json:"displayName,omitempty"`
+	FormattedAddress       string                    `json:"formattedAddress,omitempty"`
+	Location               *location                 `json:"location,omitempty"`
+	Rating                 *float64                  `json:"rating,omitempty"`
+	UserRatingCount        *int                      `json:"userRatingCount,omitempty"`
+	PriceLevel             string                    `json:"priceLevel,omitempty"`
+	PriceRange             *priceRangePayload        `json:"priceRange,omitempty"`
+	Types                  []string                  `json:"types,omitempty"`
+	PrimaryType            string                    `json:"primaryType,omitempty"`
+	PrimaryTypeDisplayName *localizedTextPayload     `json:"primaryTypeDisplayName,omitempty"`
+	BusinessStatus         string                    `json:"businessStatus,omitempty"`
+	GoogleMapsURI          string                    `json:"googleMapsUri,omitempty"`
+	EditorialSummary       *localizedTextPayload     `json:"editorialSummary,omitempty"`
+	GenerativeSummary      *generativeSummaryPayload `json:"generativeSummary,omitempty"`
+	ReviewSummary          *reviewSummaryPayload     `json:"reviewSummary,omitempty"`
+	CurrentOpeningHours    *openingHours             `json:"currentOpeningHours,omitempty"`
+	RegularOpeningHours    *openingHours             `json:"regularOpeningHours,omitempty"`
+	NationalPhoneNumber    string                    `json:"nationalPhoneNumber,omitempty"`
+	WebsiteURI             string                    `json:"websiteUri,omitempty"`
+	Reviews                []reviewPayload           `json:"reviews,omitempty"`
+	ServesBeer             *bool                     `json:"servesBeer,omitempty"`
+	ServesBreakfast        *bool                     `json:"servesBreakfast,omitempty"`
+	ServesBrunch           *bool                     `json:"servesBrunch,omitempty"`
+	ServesCocktails        *bool                     `json:"servesCocktails,omitempty"`
+	ServesCoffee           *bool                     `json:"servesCoffee,omitempty"`
+	ServesDessert          *bool                     `json:"servesDessert,omitempty"`
+	ServesDinner           *bool                     `json:"servesDinner,omitempty"`
+	ServesLunch            *bool                     `json:"servesLunch,omitempty"`
+	ServesVegetarianFood   *bool                     `json:"servesVegetarianFood,omitempty"`
+	ServesWine             *bool                     `json:"servesWine,omitempty"`
+}
+
+type generativeSummaryPayload struct {
+	Overview *localizedTextPayload `json:"overview,omitempty"`
+}
+
+type reviewSummaryPayload struct {
+	Overview *localizedTextPayload `json:"overview,omitempty"`
+}
+
+type priceRangePayload struct {
+	StartPrice *moneyPayload `json:"startPrice,omitempty"`
+	EndPrice   *moneyPayload `json:"endPrice,omitempty"`
+}
+
+type moneyPayload struct {
+	CurrencyCode string `json:"currencyCode"`
+	Units        string `json:"units"` // int64 as string in JSON
+	Nanos        int32  `json:"nanos"`
 }
 
 type displayNamePayload struct {
@@ -63,11 +100,4 @@ type visitDatePayload struct {
 	Year  int `json:"year,omitempty"`
 	Month int `json:"month,omitempty"`
 	Day   int `json:"day,omitempty"`
-}
-
-type photoPayload struct {
-	Name               string                     `json:"name,omitempty"`
-	WidthPx            int                        `json:"widthPx,omitempty"`
-	HeightPx           int                        `json:"heightPx,omitempty"`
-	AuthorAttributions []authorAttributionPayload `json:"authorAttributions,omitempty"`
 }

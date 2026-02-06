@@ -43,7 +43,7 @@ go.work.sum
 .LSOverride
 
 # Local build output
-/goplaces
+/gplace
 bin/
 dist/
 tmp/

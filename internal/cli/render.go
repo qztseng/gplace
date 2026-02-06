@@ -3,13 +3,14 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 
-	"github.com/steipete/goplaces"
+	"github.com/qztseng/gplace"
 )
 
-func renderSearch(color Color, response goplaces.SearchResponse) string {
+func renderSearch(color Color, response gplace.SearchResponse) string {
 	var out bytes.Buffer
 	count := len(response.Results)
 	if count == 0 {
@@ -36,7 +37,7 @@ func renderSearch(color Color, response goplaces.SearchResponse) string {
 	return out.String()
 }
 
-func renderAutocomplete(color Color, response goplaces.AutocompleteResponse) string {
+func renderAutocomplete(color Color, response gplace.AutocompleteResponse) string {
 	var out bytes.Buffer
 	count := len(response.Suggestions)
 	if count == 0 {
@@ -56,7 +57,7 @@ func renderAutocomplete(color Color, response goplaces.AutocompleteResponse) str
 	return out.String()
 }
 
-func renderNearby(color Color, response goplaces.NearbySearchResponse) string {
+func renderNearby(color Color, response gplace.NearbySearchResponse) string {
 	var out bytes.Buffer
 	count := len(response.Results)
 	if count == 0 {
@@ -83,16 +84,7 @@ func renderNearby(color Color, response goplaces.NearbySearchResponse) string {
 	return out.String()
 }
 
-func renderPhoto(color Color, response goplaces.PhotoMediaResponse) string {
-	var out bytes.Buffer
-	out.WriteString(color.Bold("Photo"))
-	out.WriteString("\n")
-	writeLine(&out, color, "Name", response.Name)
-	writeLine(&out, color, "URL", response.PhotoURI)
-	return out.String()
-}
-
-func renderDetails(color Color, place goplaces.PlaceDetails) string {
+func renderDetails(color Color, place gplace.PlaceDetails) string {
 	var out bytes.Buffer
 	out.WriteString(color.Bold(formatTitle(color, place.Name, place.Address)))
 	out.WriteString("\n")
@@ -100,7 +92,7 @@ func renderDetails(color Color, place goplaces.PlaceDetails) string {
 	return out.String()
 }
 
-func renderResolve(color Color, response goplaces.LocationResolveResponse) string {
+func renderResolve(color Color, response gplace.LocationResolveResponse) string {
 	var out bytes.Buffer
 	count := len(response.Results)
 	if count == 0 {
@@ -119,7 +111,7 @@ func renderResolve(color Color, response goplaces.LocationResolveResponse) strin
 	return out.String()
 }
 
-func renderRoute(color Color, response goplaces.RouteResponse) string {
+func renderRoute(color Color, response gplace.RouteResponse) string {
 	var out bytes.Buffer
 	count := len(response.Waypoints)
 	if count == 0 {
@@ -168,14 +160,14 @@ func formatTitle(color Color, name string, address string) string {
 
 const emptyResultsMessage = "No results."
 
-func autocompleteTitle(suggestion goplaces.AutocompleteSuggestion) string {
+func autocompleteTitle(suggestion gplace.AutocompleteSuggestion) string {
 	if strings.TrimSpace(suggestion.MainText) != "" {
 		return suggestion.MainText
 	}
 	return suggestion.Text
 }
 
-func autocompleteSubtitle(suggestion goplaces.AutocompleteSuggestion) string {
+func autocompleteSubtitle(suggestion gplace.AutocompleteSuggestion) string {
 	if strings.TrimSpace(suggestion.SecondaryText) != "" {
 		return suggestion.SecondaryText
 	}
@@ -185,15 +177,15 @@ func autocompleteSubtitle(suggestion goplaces.AutocompleteSuggestion) string {
 	return suggestion.Text
 }
 
-func writePlaceSummary(out *bytes.Buffer, color Color, place goplaces.PlaceSummary) {
+func writePlaceSummary(out *bytes.Buffer, color Color, place gplace.PlaceSummary) {
 	writeLine(out, color, "ID", place.PlaceID)
 	writeLocation(out, color, place.Location)
-	writeRating(out, color, place.Rating, place.PriceLevel)
+	writeRating(out, color, place.Rating, place.UserRatingCount, place.PriceLevel, nil)
 	writeTypes(out, color, place.Types)
 	writeOpenNow(out, color, place.OpenNow)
 }
 
-func writeAutocompleteSuggestion(out *bytes.Buffer, color Color, suggestion goplaces.AutocompleteSuggestion) {
+func writeAutocompleteSuggestion(out *bytes.Buffer, color Color, suggestion gplace.AutocompleteSuggestion) {
 	writeLine(out, color, "Kind", suggestion.Kind)
 	writeLine(out, color, "ID", suggestion.PlaceID)
 	writeLine(out, color, "Place", suggestion.Place)
@@ -203,16 +195,46 @@ func writeAutocompleteSuggestion(out *bytes.Buffer, color Color, suggestion gopl
 	}
 }
 
-func writePlaceDetails(out *bytes.Buffer, color Color, place goplaces.PlaceDetails) {
+func writePlaceDetails(out *bytes.Buffer, color Color, place gplace.PlaceDetails) {
 	writeLine(out, color, "ID", place.PlaceID)
 	writeLocation(out, color, place.Location)
-	writeRating(out, color, place.Rating, place.PriceLevel)
+	writeRating(out, color, place.Rating, place.UserRatingCount, place.PriceLevel, place.PriceRange)
+	writeLine(out, color, "Status", place.BusinessStatus)
 	writeTypes(out, color, place.Types)
-	writeOpenNow(out, color, place.OpenNow)
+
+	if place.PrimaryTypeDisplayName != "" {
+		writeLine(out, color, "Primary Type", place.PrimaryTypeDisplayName)
+	}
+
 	writeLine(out, color, "Phone", place.Phone)
 	writeLine(out, color, "Website", place.Website)
-	writePhotos(out, color, place.Photos)
+	writeLine(out, color, "Maps", place.GoogleMapsURI)
+
+	if place.EditorialSummary != "" {
+		out.WriteString(color.Dim("Summary:"))
+		out.WriteString(" ")
+		out.WriteString(place.EditorialSummary)
+		out.WriteString("\n")
+	}
+
+	if place.GenerativeSummary != "" {
+		out.WriteString(color.Dim("AI Overview:"))
+		out.WriteString(" ")
+		out.WriteString(place.GenerativeSummary)
+		out.WriteString("\n")
+	}
+
+	if place.ReviewSummary != "" {
+		out.WriteString(color.Dim("Review Summary:"))
+		out.WriteString(" ")
+		out.WriteString(place.ReviewSummary)
+		out.WriteString("\n")
+	}
+
+	writeAmenities(out, color, place)
+	writeOpenNow(out, color, place.OpenNow)
 	writeReviews(out, color, place.Reviews)
+
 	if len(place.Hours) > 0 {
 		out.WriteString(color.Dim("Hours:"))
 		out.WriteString("\n")
@@ -224,44 +246,37 @@ func writePlaceDetails(out *bytes.Buffer, color Color, place goplaces.PlaceDetai
 	}
 }
 
-func writeResolvedLocation(out *bytes.Buffer, color Color, place goplaces.ResolvedLocation) {
+func writeAmenities(out *bytes.Buffer, color Color, place gplace.PlaceDetails) {
+	var amenities []string
+	add := func(val *bool, label string) {
+		if val != nil && *val {
+			amenities = append(amenities, label)
+		}
+	}
+
+	add(place.ServesBeer, "Beer")
+	add(place.ServesBreakfast, "Breakfast")
+	add(place.ServesBrunch, "Brunch")
+	add(place.ServesCocktails, "Cocktails")
+	add(place.ServesCoffee, "Coffee")
+	add(place.ServesDessert, "Dessert")
+	add(place.ServesDinner, "Dinner")
+	add(place.ServesLunch, "Lunch")
+	add(place.ServesVegetarianFood, "Vegetarian")
+	add(place.ServesWine, "Wine")
+
+	if len(amenities) > 0 {
+		writeLine(out, color, "Serves", strings.Join(amenities, ", "))
+	}
+}
+
+func writeResolvedLocation(out *bytes.Buffer, color Color, place gplace.ResolvedLocation) {
 	writeLine(out, color, "ID", place.PlaceID)
 	writeLocation(out, color, place.Location)
 	writeTypes(out, color, place.Types)
 }
 
-func writePhotos(out *bytes.Buffer, color Color, photos []goplaces.Photo) {
-	if len(photos) == 0 {
-		return
-	}
-	out.WriteString(color.Dim("Photos:"))
-	out.WriteString("\n")
-
-	const maxPhotos = 3
-	count := len(photos)
-	limit := count
-	if count > maxPhotos {
-		limit = maxPhotos
-	}
-
-	for i := 0; i < limit; i++ {
-		photo := photos[i]
-		line := photoLine(photo)
-		if line == "" {
-			continue
-		}
-		out.WriteString("  - ")
-		out.WriteString(line)
-		out.WriteString("\n")
-	}
-
-	if count > maxPhotos {
-		out.WriteString(color.Dim(fmt.Sprintf("  ... %d more", count-maxPhotos)))
-		out.WriteString("\n")
-	}
-}
-
-func writeReviews(out *bytes.Buffer, color Color, reviews []goplaces.Review) {
+func writeReviews(out *bytes.Buffer, color Color, reviews []gplace.Review) {
 	if len(reviews) == 0 {
 		return
 	}
@@ -293,25 +308,74 @@ func writeReviews(out *bytes.Buffer, color Color, reviews []goplaces.Review) {
 	}
 }
 
-func writeLocation(out *bytes.Buffer, color Color, loc *goplaces.LatLng) {
+func writeLocation(out *bytes.Buffer, color Color, loc *gplace.LatLng) {
 	if loc == nil {
 		return
 	}
 	writeLine(out, color, "Location", fmt.Sprintf("%.6f, %.6f", loc.Lat, loc.Lng))
 }
 
-func writeRating(out *bytes.Buffer, color Color, rating *float64, priceLevel *int) {
-	if rating == nil && priceLevel == nil {
+func writeRating(out *bytes.Buffer, color Color, rating *float64, count *int, priceLevel *int, priceRange *gplace.PriceRange) {
+	if rating == nil && count == nil && priceLevel == nil && priceRange == nil {
 		return
 	}
-	parts := make([]string, 0, 2)
+	parts := make([]string, 0, 4)
 	if rating != nil {
-		parts = append(parts, fmt.Sprintf("%.1f", *rating))
+		r := fmt.Sprintf("%.1f", *rating)
+		if count != nil {
+			r += fmt.Sprintf(" (%d)", *count)
+		}
+		parts = append(parts, r)
+	} else if count != nil {
+		parts = append(parts, fmt.Sprintf("%d ratings", *count))
 	}
-	if priceLevel != nil {
-		parts = append(parts, fmt.Sprintf("$%d", *priceLevel))
+
+	if priceRange != nil {
+		parts = append(parts, formatPriceRange(priceRange))
+	} else if priceLevel != nil {
+		parts = append(parts, strings.Repeat("$", *priceLevel))
 	}
 	writeLine(out, color, "Rating", strings.Join(parts, " · "))
+}
+
+func formatPriceRange(pr *gplace.PriceRange) string {
+	if pr == nil {
+		return ""
+	}
+	start := formatMoney(pr.StartPrice)
+	end := formatMoney(pr.EndPrice)
+	if start == "" && end == "" {
+		return ""
+	}
+	if start == end {
+		return start
+	}
+	return fmt.Sprintf("%s–%s", start, end)
+}
+
+func formatMoney(m *gplace.Money) string {
+	if m == nil {
+		return ""
+	}
+	// Simple formatting: ignore nanos if they are 0 for brevity.
+	// We use the currency code as a suffix/prefix.
+	val := float64(m.Units) + float64(m.Nanos)/math.Pow(10, 9)
+
+	// Format based on common currencies or just Code + Value
+	symbol := m.CurrencyCode
+	switch m.CurrencyCode {
+	case "USD":
+		symbol = "$"
+	case "EUR":
+		symbol = "€"
+	case "GBP":
+		symbol = "£"
+	}
+
+	if m.Nanos == 0 {
+		return fmt.Sprintf("%s%.0f", symbol, val)
+	}
+	return fmt.Sprintf("%s%.2f", symbol, val)
 }
 
 func writeTypes(out *bytes.Buffer, color Color, types []string) {
@@ -343,7 +407,7 @@ func writeLine(out *bytes.Buffer, color Color, label string, value string) {
 	out.WriteString("\n")
 }
 
-func reviewLine(review goplaces.Review) string {
+func reviewLine(review gplace.Review) string {
 	parts := make([]string, 0, 3)
 	if review.Rating != nil {
 		parts = append(parts, fmt.Sprintf("%.1f stars", *review.Rating))
@@ -361,21 +425,7 @@ func reviewLine(review goplaces.Review) string {
 	return strings.Join(parts, " ")
 }
 
-func photoLine(photo goplaces.Photo) string {
-	parts := make([]string, 0, 3)
-	if strings.TrimSpace(photo.Name) != "" {
-		parts = append(parts, photo.Name)
-	}
-	if photo.WidthPx > 0 && photo.HeightPx > 0 {
-		parts = append(parts, fmt.Sprintf("%dx%d", photo.WidthPx, photo.HeightPx))
-	}
-	if len(photo.AuthorAttributions) > 0 && strings.TrimSpace(photo.AuthorAttributions[0].DisplayName) != "" {
-		parts = append(parts, "by "+photo.AuthorAttributions[0].DisplayName)
-	}
-	return strings.Join(parts, " · ")
-}
-
-func reviewText(review goplaces.Review) string {
+func reviewText(review gplace.Review) string {
 	text := ""
 	if review.Text != nil {
 		text = review.Text.Text

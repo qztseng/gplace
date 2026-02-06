@@ -6,19 +6,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/steipete/goplaces"
+	"github.com/qztseng/gplace"
 )
 
 func TestRenderSearch(t *testing.T) {
 	open := true
 	level := 2
-	response := goplaces.SearchResponse{
-		Results: []goplaces.PlaceSummary{
+	response := gplace.SearchResponse{
+		Results: []gplace.PlaceSummary{
 			{
 				PlaceID:    "abc",
 				Name:       "Cafe",
 				Address:    "123 Street",
-				Location:   &goplaces.LatLng{Lat: 1, Lng: 2},
+				Location:   &gplace.LatLng{Lat: 1, Lng: 2},
 				Rating:     floatPtr(4.5),
 				PriceLevel: &level,
 				Types:      []string{"cafe", "coffee_shop"},
@@ -44,15 +44,15 @@ func TestRenderSearch(t *testing.T) {
 }
 
 func TestRenderSearchEmpty(t *testing.T) {
-	output := renderSearch(NewColor(false), goplaces.SearchResponse{})
+	output := renderSearch(NewColor(false), gplace.SearchResponse{})
 	if !strings.Contains(output, "No results") {
 		t.Fatalf("unexpected output: %s", output)
 	}
 }
 
 func TestRenderAutocomplete(t *testing.T) {
-	response := goplaces.AutocompleteResponse{
-		Suggestions: []goplaces.AutocompleteSuggestion{
+	response := gplace.AutocompleteResponse{
+		Suggestions: []gplace.AutocompleteSuggestion{
 			{
 				Kind:          "place",
 				PlaceID:       "abc",
@@ -78,15 +78,15 @@ func TestRenderAutocomplete(t *testing.T) {
 }
 
 func TestRenderAutocompleteEmpty(t *testing.T) {
-	output := renderAutocomplete(NewColor(false), goplaces.AutocompleteResponse{})
+	output := renderAutocomplete(NewColor(false), gplace.AutocompleteResponse{})
 	if !strings.Contains(output, "No results") {
 		t.Fatalf("unexpected output: %s", output)
 	}
 }
 
 func TestRenderNearby(t *testing.T) {
-	response := goplaces.NearbySearchResponse{
-		Results: []goplaces.PlaceSummary{
+	response := gplace.NearbySearchResponse{
+		Results: []gplace.PlaceSummary{
 			{PlaceID: "place-1", Name: "Cafe"},
 		},
 		NextPageToken: "next",
@@ -104,11 +104,11 @@ func TestRenderNearby(t *testing.T) {
 }
 
 func TestRenderRoute(t *testing.T) {
-	response := goplaces.RouteResponse{
-		Waypoints: []goplaces.RouteWaypoint{
+	response := gplace.RouteResponse{
+		Waypoints: []gplace.RouteWaypoint{
 			{
-				Location: goplaces.LatLng{Lat: 1, Lng: 2},
-				Results:  []goplaces.PlaceSummary{{PlaceID: "place-1", Name: "Cafe"}},
+				Location: gplace.LatLng{Lat: 1, Lng: 2},
+				Results:  []gplace.PlaceSummary{{PlaceID: "place-1", Name: "Cafe"}},
 			},
 		},
 	}
@@ -125,7 +125,7 @@ func TestRenderRoute(t *testing.T) {
 }
 
 func TestRenderRouteEmpty(t *testing.T) {
-	output := renderRoute(NewColor(false), goplaces.RouteResponse{})
+	output := renderRoute(NewColor(false), gplace.RouteResponse{})
 	if !strings.Contains(output, "No results") {
 		t.Fatalf("unexpected output: %s", output)
 	}
@@ -152,27 +152,27 @@ func TestWriteLineAndOpenNowNoValue(t *testing.T) {
 
 func TestRenderDetailsAndResolve(t *testing.T) {
 	open := false
-	level := 0
-	details := goplaces.PlaceDetails{
-		PlaceID:    "place-1",
-		Name:       "Park",
-		Address:    "Central",
-		Rating:     floatPtr(4.2),
-		PriceLevel: &level,
-		Types:      []string{"park"},
-		Phone:      "+1 555",
-		Website:    "https://example.com",
-		Hours:      []string{"Mon: 9-5"},
-		OpenNow:    &open,
-		Photos: []goplaces.Photo{
-			{Name: "places/place-1/photos/photo-1", WidthPx: 1200, HeightPx: 800},
-		},
-		Reviews: []goplaces.Review{
+	level := 2
+	count := 150
+	details := gplace.PlaceDetails{
+		PlaceID:         "place-1",
+		Name:            "Park",
+		Address:         "Central",
+		Rating:          floatPtr(4.2),
+		UserRatingCount: &count,
+		PriceLevel:      &level,
+		PriceRange:      nil,
+		Types:           []string{"park"},
+		Phone:   "+1 555",
+		Website: "https://example.com",
+		Hours:   []string{"Mon: 9-5"},
+		OpenNow: &open,
+		Reviews: []gplace.Review{
 			{
 				Rating:                         floatPtr(4.5),
 				RelativePublishTimeDescription: "2 weeks ago",
-				Text:                           &goplaces.LocalizedText{Text: "Great park"},
-				Author:                         &goplaces.AuthorAttribution{DisplayName: "Alice"},
+				Text:                           &gplace.LocalizedText{Text: "Great park"},
+				Author:                         &gplace.AuthorAttribution{DisplayName: "Alice"},
 			},
 		},
 	}
@@ -180,32 +180,22 @@ func TestRenderDetailsAndResolve(t *testing.T) {
 	if !strings.Contains(output, "Park") || !strings.Contains(output, "Hours:") {
 		t.Fatalf("unexpected details output: %s", output)
 	}
-	if !strings.Contains(output, "Photos:") {
-		t.Fatalf("missing photos output: %s", output)
+	if !strings.Contains(output, "4.2 (150)") {
+		t.Fatalf("missing user rating count: %s", output)
+	}
+	if !strings.Contains(output, "$$") {
+		t.Fatalf("missing price level signs: %s", output)
 	}
 	if !strings.Contains(output, "Reviews:") || !strings.Contains(output, "Alice") {
 		t.Fatalf("missing reviews output: %s", output)
 	}
 
-	resolve := goplaces.LocationResolveResponse{
-		Results: []goplaces.ResolvedLocation{{PlaceID: "loc-1", Name: "Downtown"}},
+	resolve := gplace.LocationResolveResponse{
+		Results: []gplace.ResolvedLocation{{PlaceID: "loc-1", Name: "Downtown"}},
 	}
 	outResolve := renderResolve(NewColor(false), resolve)
 	if !strings.Contains(outResolve, "Resolved") {
 		t.Fatalf("unexpected resolve output: %s", outResolve)
-	}
-}
-
-func TestRenderPhoto(t *testing.T) {
-	output := renderPhoto(NewColor(false), goplaces.PhotoMediaResponse{
-		Name:     "places/place-1/photos/photo-1",
-		PhotoURI: "https://example.com/photo.jpg",
-	})
-	if !strings.Contains(output, "Photo") {
-		t.Fatalf("missing photo header")
-	}
-	if !strings.Contains(output, "photo.jpg") {
-		t.Fatalf("missing photo uri")
 	}
 }
 

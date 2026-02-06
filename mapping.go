@@ -1,6 +1,52 @@
-package goplaces
+package gplace
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
+
+func mapPriceRange(payload *priceRangePayload) *PriceRange {
+	if payload == nil {
+		return nil
+	}
+	return &PriceRange{
+		StartPrice: mapMoney(payload.StartPrice),
+		EndPrice:   mapMoney(payload.EndPrice),
+	}
+}
+
+func mapMoney(payload *moneyPayload) *Money {
+	if payload == nil {
+		return nil
+	}
+	units, _ := strconv.ParseInt(payload.Units, 10, 64)
+	return &Money{
+		CurrencyCode: payload.CurrencyCode,
+		Units:        units,
+		Nanos:        payload.Nanos,
+	}
+}
+
+func mapText(payload *localizedTextPayload) string {
+	if payload == nil {
+		return ""
+	}
+	return payload.Text
+}
+
+func mapGenerativeSummary(payload *generativeSummaryPayload) string {
+	if payload == nil {
+		return ""
+	}
+	return mapText(payload.Overview)
+}
+
+func mapReviewSummary(payload *reviewSummaryPayload) string {
+	if payload == nil {
+		return ""
+	}
+	return mapText(payload.Overview)
+}
 
 func mapReviews(reviews []reviewPayload) []Review {
 	if len(reviews) == 0 {
@@ -19,22 +65,6 @@ func mapReviews(reviews []reviewPayload) []Review {
 			FlagContentURI:                 review.FlagContentURI,
 			GoogleMapsURI:                  review.GoogleMapsURI,
 			VisitDate:                      mapVisitDate(review.VisitDate),
-		})
-	}
-	return mapped
-}
-
-func mapPhotos(photos []photoPayload) []Photo {
-	if len(photos) == 0 {
-		return nil
-	}
-	mapped := make([]Photo, 0, len(photos))
-	for _, photo := range photos {
-		mapped = append(mapped, Photo{
-			Name:               photo.Name,
-			WidthPx:            photo.WidthPx,
-			HeightPx:           photo.HeightPx,
-			AuthorAttributions: mapAuthorAttributions(photo.AuthorAttributions),
 		})
 	}
 	return mapped

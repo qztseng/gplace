@@ -1,4 +1,4 @@
-module github.com/steipete/goplaces
+module github.com/qztseng/gplace
 
 go 1.25.5
 

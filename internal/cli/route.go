@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/steipete/goplaces"
+	"github.com/qztseng/gplace"
 )
 
 // RouteCmd searches along a route between two locations.
@@ -22,7 +22,7 @@ type RouteCmd struct {
 
 // Run executes the route command.
 func (c *RouteCmd) Run(app *App) error {
-	request := goplaces.RouteRequest{
+	request := gplace.RouteRequest{
 		Query:        c.Query,
 		From:         c.From,
 		To:           c.To,

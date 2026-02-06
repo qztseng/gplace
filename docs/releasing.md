@@ -7,7 +7,7 @@ Quick, repeatable release checklist. Mirrors gifgrep cadence.
 - Update `CHANGELOG.md` for the new version.
 - Run gate: `./scripts/check-coverage.sh` + `golangci-lint run ./...`.
 - Ensure `main` is clean and pushed.
-- Ensure `HOMEBREW_TAP_GITHUB_TOKEN` secret is set (pushes formula to `steipete/homebrew-tap`).
+- Ensure `HOMEBREW_TAP_GITHUB_TOKEN` secret is set (pushes formula to `qztseng/homebrew-tap`).
 
 ## Tag + Release
 
@@ -24,5 +24,5 @@ Homebrew (local tap update): see `docs/releasing-homebrew.md`.
 ## Notes
 
 - CLI version set via ldflags in `.goreleaser.yml`:
-  `-X github.com/steipete/goplaces/internal/cli.Version={{.Version}}`
-- Local smoke build: `make goplaces`
+  `-X github.com/qztseng/gplace/internal/cli.Version={{.Version}}`
+- Local smoke build: `make gplace`

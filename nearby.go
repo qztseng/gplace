@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const nearbyFieldMask = "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.priceLevel,places.types,places.currentOpeningHours"
+const nearbyFieldMask = "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.priceLevel,places.types,places.currentOpeningHours"
 
 // NearbySearch performs a nearby search around a location restriction.
 func (c *Client) NearbySearch(ctx context.Context, req NearbySearchRequest) (NearbySearchResponse, error) {
@@ -45,7 +45,7 @@ func (c *Client) NearbySearch(ctx context.Context, req NearbySearchRequest) (Nea
 
 	var response searchResponse
 	if err := json.Unmarshal(payload, &response); err != nil {
-		return NearbySearchResponse{}, fmt.Errorf("goplaces: decode nearby response: %w", err)
+		return NearbySearchResponse{}, fmt.Errorf("gplace: decode nearby response: %w", err)
 	}
 
 	results := make([]PlaceSummary, 0, len(response.Places))

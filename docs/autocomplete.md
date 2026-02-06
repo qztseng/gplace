@@ -5,8 +5,8 @@ Autocomplete returns place + query suggestions for partial text.
 ## CLI
 
 ```bash
-goplaces autocomplete "cof" \
-  --session-token "goplaces-demo" \
+gplace autocomplete "cof" \
+  --session-token "gplace-demo" \
   --limit 5 \
   --language en \
   --region US
@@ -15,15 +15,15 @@ goplaces autocomplete "cof" \
 Optional location bias:
 
 ```bash
-goplaces autocomplete "pizza" --lat 40.7411 --lng -73.9897 --radius-m 1500
+gplace autocomplete "pizza" --lat 40.7411 --lng -73.9897 --radius-m 1500
 ```
 
 ## Library
 
 ```go
-response, err := client.Autocomplete(ctx, goplaces.AutocompleteRequest{
+response, err := client.Autocomplete(ctx, gplace.AutocompleteRequest{
     Input:        "cof",
-    SessionToken: "goplaces-demo",
+    SessionToken: "gplace-demo",
     Limit:        5,
     Language:     "en",
     Region:       "US",

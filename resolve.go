@@ -1,4 +1,4 @@
-package goplaces
+package gplace
 
 import (
 	"context"
@@ -39,7 +39,7 @@ func (c *Client) Resolve(ctx context.Context, req LocationResolveRequest) (Locat
 
 	var response searchResponse
 	if err := json.Unmarshal(payload, &response); err != nil {
-		return LocationResolveResponse{}, fmt.Errorf("goplaces: decode resolve response: %w", err)
+		return LocationResolveResponse{}, fmt.Errorf("gplace: decode resolve response: %w", err)
 	}
 
 	results := make([]ResolvedLocation, 0, len(response.Places))
