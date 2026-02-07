@@ -16,10 +16,7 @@
 - [x] Docs: `docs/nearby-search.md` + README update.
 - [x] Lint + coverage gate.
 
-## Photos
-- [x] Client: details photos + media URL endpoint.
-- [x] CLI: `gplace photo` flags + renderer.
-- [x] Tests: client + CLI coverage.
-- [x] E2E: details photos + photo media URL.
-- [x] Docs: `docs/photos.md` + README update.
-- [x] Lint + coverage gate.
+## AI Readiness
+- [ ] Example `SKILL.md` for AI agents.
+- [x] JSON output for all commands.
+- [x] Comprehensive field masks for cost/speed optimization.

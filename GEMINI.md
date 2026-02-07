@@ -11,7 +11,7 @@
 - **AI Integration**: Designed to be used by AI agents. Agents can be instructed to create `SKILL.md` files to automate tasks using `gplace`.
 
 ### Core Technologies
-- **Language**: Go (1.25.5+)
+- **Language**: Go (1.24.0+)
 - **CLI Framework**: Kong
 - **API**: Google Places API (New) & Google Routes API
 
