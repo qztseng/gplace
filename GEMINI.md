@@ -1,15 +1,18 @@
 # GEMINI.md - Project Context (gplace)
 
 ## Project Overview
-`gplace` is a modern Go client library and CLI tool for the **Google Places API (New)**. It is a specialized version of the original `goplaces` project, optimized for CLI use with enhanced metadata support.
+`gplace` is a modern Go client library and CLI tool for the **Google Places API (New)**. It is a specialized version of the original `goplaces` project, optimized for AI agent automation and enhanced metadata extraction.
+
+### ⚠️ Billing Warning
+By default, `gplace` requests fields from the **Pro** and **Enterprise** SKUs of the Places API (New) to provide rich metadata. Requests for reviews, amenities, and AI summaries trigger **Enterprise-tier** pricing.
 
 ### Key Features
 - **Enhanced Details**: Fetches `userRatingCount`, `priceRange`, and detailed "serves" flags (Beer, Coffee, etc.).
-- **Auto-Localization**: Supports `--local` flag for automatic local language detection (two-pass lookup).
-- **Summaries**: Supports Editorial, AI-generated (Generative), and Review summaries.
-- **Price Representation**: Renders numeric price levels as repeated dollar signs (e.g., `$$`).
-- **No Photos**: Photo fetching has been removed to keep the CLI tool focused on textual metadata and scripting efficiency.
-- **AI Integration**: Designed to be used by AI agents. Agents can be instructed to create `SKILL.md` files to automate tasks using `gplace`.
+- **Auto-Localization**: Supports the `--local` flag for automatic local language detection (two-pass lookup).
+- **Summaries**: Supports AI-generated Review summaries (`review_summary`) and individual reviews.
+- **AI Integration**: Specifically designed for AI agents (Gemini, Claude). Agents should use `SKILL.md` to automate complex research workflows.
+- **Photos**: Removed to keep the CLI focused on data and speed.
+- **Field Masks**: Uses selective masks to fetch only necessary data.
 
 ### Core Technologies
 - **Language**: Go (1.24.0+)
