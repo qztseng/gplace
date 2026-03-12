@@ -117,8 +117,9 @@ type PlaceDetails struct {
 	Website                string      `json:"website,omitempty"`
 	Hours                  []string    `json:"hours,omitempty"`
 	OpenNow                *bool       `json:"open_now,omitempty"`
-	Reviews                []Review    `json:"reviews,omitempty"`
-	ServesBeer             *bool       `json:"serves_beer,omitempty"`
+	Reviews                []Review           `json:"reviews,omitempty"`
+	AddressComponents      []AddressComponent `json:"address_components,omitempty"`
+	ServesBeer             *bool              `json:"serves_beer,omitempty"`
 	ServesBreakfast        *bool       `json:"serves_breakfast,omitempty"`
 	ServesBrunch           *bool       `json:"serves_brunch,omitempty"`
 	ServesCocktails        *bool       `json:"serves_cocktails,omitempty"`
@@ -128,6 +129,14 @@ type PlaceDetails struct {
 	ServesLunch            *bool       `json:"serves_lunch,omitempty"`
 	ServesVegetarianFood   *bool       `json:"serves_vegetarian_food,omitempty"`
 	ServesWine             *bool       `json:"serves_wine,omitempty"`
+}
+
+// AddressComponent represents a part of a place's address.
+type AddressComponent struct {
+	LongText     string   `json:"long_text"`
+	ShortText    string   `json:"short_text"`
+	Types        []string `json:"types"`
+	LanguageCode string   `json:"language_code"`
 }
 
 // PriceRange represents the price range of a place.

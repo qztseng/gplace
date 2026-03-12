@@ -24,6 +24,7 @@ type placeItem struct {
 	ReviewSummary          *reviewSummaryPayload     `json:"reviewSummary,omitempty"`
 	CurrentOpeningHours    *openingHours             `json:"currentOpeningHours,omitempty"`
 	RegularOpeningHours    *openingHours             `json:"regularOpeningHours,omitempty"`
+	AddressComponents      []addressComponentPayload `json:"addressComponents,omitempty"`
 	NationalPhoneNumber    string                    `json:"nationalPhoneNumber,omitempty"`
 	WebsiteURI             string                    `json:"websiteUri,omitempty"`
 	Reviews                []reviewPayload           `json:"reviews,omitempty"`
@@ -94,6 +95,13 @@ type authorAttributionPayload struct {
 	DisplayName string `json:"displayName,omitempty"`
 	URI         string `json:"uri,omitempty"`
 	PhotoURI    string `json:"photoUri,omitempty"`
+}
+
+type addressComponentPayload struct {
+	LongText     string   `json:"longText"`
+	ShortText    string   `json:"shortText"`
+	Types        []string `json:"types"`
+	LanguageCode string   `json:"languageCode"`
 }
 
 type visitDatePayload struct {

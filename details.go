@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	detailsFieldMaskBase   = "id,displayName,formattedAddress,location,rating,userRatingCount,priceLevel,priceRange,types,primaryType,primaryTypeDisplayName,businessStatus,googleMapsUri,editorialSummary,generativeSummary,reviewSummary,regularOpeningHours,currentOpeningHours,nationalPhoneNumber,websiteUri,servesBeer,servesBreakfast,servesBrunch,servesCocktails,servesCoffee,servesDessert,servesDinner,servesLunch,servesVegetarianFood,servesWine"
+	detailsFieldMaskBase   = "id,displayName,formattedAddress,location,rating,userRatingCount,priceLevel,priceRange,types,primaryType,primaryTypeDisplayName,businessStatus,googleMapsUri,editorialSummary,generativeSummary,reviewSummary,regularOpeningHours,currentOpeningHours,addressComponents,nationalPhoneNumber,websiteUri,servesBeer,servesBreakfast,servesBrunch,servesCocktails,servesCoffee,servesDessert,servesDinner,servesLunch,servesVegetarianFood,servesWine"
 	detailsFieldMaskReview = "reviews"
 )
 
@@ -78,6 +78,7 @@ func mapPlaceDetails(place placeItem) PlaceDetails {
 		Hours:                  weekdayDescriptions(place.RegularOpeningHours),
 		OpenNow:                openNow(place.CurrentOpeningHours),
 		Reviews:                mapReviews(place.Reviews),
+		AddressComponents:      mapAddressComponents(place.AddressComponents),
 		ServesBeer:             place.ServesBeer,
 		ServesBreakfast:        place.ServesBreakfast,
 		ServesBrunch:           place.ServesBrunch,

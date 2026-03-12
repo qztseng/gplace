@@ -162,3 +162,53 @@ func mapPriceLevel(value string) *int {
 	}
 	return nil
 }
+
+func mapAddressComponents(payload []addressComponentPayload) []AddressComponent {
+	if len(payload) == 0 {
+		return nil
+	}
+	mapped := make([]AddressComponent, 0, len(payload))
+	for _, comp := range payload {
+		mapped = append(mapped, AddressComponent{
+			LongText:     comp.LongText,
+			ShortText:    comp.ShortText,
+			Types:        comp.Types,
+			LanguageCode: comp.LanguageCode,
+		})
+	}
+	return mapped
+}
+
+// DetectLocalLanguage returns a BCP-47 language code for a set of address components.
+func DetectLocalLanguage(components []AddressComponent) string {
+	for _, comp := range components {
+		for _, t := range comp.Types {
+			if t == "country" {
+				if lang, ok := regionToLanguage[comp.ShortText]; ok {
+					return lang
+				}
+			}
+		}
+	}
+	return ""
+}
+
+var regionToLanguage = map[string]string{
+	"JP": "ja",
+	"FR": "fr",
+	"DE": "de",
+	"ES": "es",
+	"IT": "it",
+	"KR": "ko",
+	"CN": "zh-CN",
+	"TW": "zh-TW",
+	"BR": "pt",
+	"RU": "ru",
+	"SA": "ar",
+	"TH": "th",
+	"VN": "vi",
+	"ID": "id",
+	"NL": "nl",
+	"PL": "pl",
+	"TR": "tr",
+}

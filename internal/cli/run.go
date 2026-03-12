@@ -167,6 +167,23 @@ func (c *SearchCmd) Run(app *App) error {
 		return err
 	}
 
+	if c.Local && c.Language == "" && len(response.Results) > 0 {
+		// Detect local language from first result.
+		place, err := app.client.DetailsWithOptions(context.Background(), gplace.DetailsRequest{
+			PlaceID: response.Results[0].PlaceID,
+		})
+		if err == nil {
+			localLang := gplace.DetectLocalLanguage(place.AddressComponents)
+			if localLang != "" {
+				request.Language = localLang
+				response, err = app.client.Search(context.Background(), request)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	if app.json {
 		if err := writeJSON(app.out, response.Results); err != nil {
 			return err
@@ -239,6 +256,23 @@ func (c *NearbyCmd) Run(app *App) error {
 		return err
 	}
 
+	if c.Local && c.Language == "" && len(response.Results) > 0 {
+		// Detect local language from first result.
+		place, err := app.client.DetailsWithOptions(context.Background(), gplace.DetailsRequest{
+			PlaceID: response.Results[0].PlaceID,
+		})
+		if err == nil {
+			localLang := gplace.DetectLocalLanguage(place.AddressComponents)
+			if localLang != "" {
+				request.Language = localLang
+				response, err = app.client.NearbySearch(context.Background(), request)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	if app.json {
 		if err := writeJSON(app.out, response.Results); err != nil {
 			return err
@@ -255,9 +289,22 @@ func (c *NearbyCmd) Run(app *App) error {
 
 // Run executes the details command.
 func (c *DetailsCmd) Run(app *App) error {
-	response, err := app.client.DetailsWithOptions(context.Background(), gplace.DetailsRequest{
+	ctx := context.Background()
+	language := c.Language
+
+	if c.Local && language == "" {
+		// First pass: detect local language.
+		place, err := app.client.DetailsWithOptions(ctx, gplace.DetailsRequest{
+			PlaceID: c.PlaceID,
+		})
+		if err == nil {
+			language = gplace.DetectLocalLanguage(place.AddressComponents)
+		}
+	}
+
+	response, err := app.client.DetailsWithOptions(ctx, gplace.DetailsRequest{
 		PlaceID:        c.PlaceID,
-		Language:       c.Language,
+		Language:       language,
 		Region:         c.Region,
 		IncludeReviews: c.Reviews,
 	})

@@ -29,19 +29,20 @@ type GlobalOptions struct {
 
 // SearchCmd runs text search queries.
 type SearchCmd struct {
-	Query      string   `arg:"" name:"query" help:"Search text."`
-	Limit      int      `help:"Max results (1-20)." default:"10"`
-	PageToken  string   `help:"Page token for pagination."`
-	Language   string   `help:"BCP-47 language code (e.g. en, en-US)."`
-	Region     string   `help:"CLDR region code (e.g. US, DE)."`
-	Keyword    string   `help:"Keyword to append to the query."`
-	Type       []string `help:"Place type filter (includedType). Repeatable."`
-	OpenNow    *bool    `help:"Return only currently open places."`
-	MinRating  *float64 `help:"Minimum rating (0-5)."`
-	PriceLevel []int    `help:"Price levels 0-4. Repeatable."`
-	Lat        *float64 `help:"Latitude for location bias."`
-	Lng        *float64 `help:"Longitude for location bias."`
-	RadiusM    *float64 `help:"Radius in meters for location bias."`
+	Query       string   `arg:"" name:"query" help:"Search text."`
+	Limit       int      `help:"Max results (1-20)." default:"10"`
+	PageToken   string   `help:"Page token for pagination."`
+	Language    string   `help:"BCP-47 language code (e.g. en, en-US)."`
+	Region      string   `help:"CLDR region code (e.g. US, DE)."`
+	Keyword     string   `help:"Keyword to append to the query."`
+	Type        []string `help:"Place type filter (includedType). Repeatable."`
+	OpenNow     *bool    `help:"Return only currently open places."`
+	MinRating   *float64 `help:"Minimum rating (0-5)."`
+	PriceLevel  []int    `help:"Price levels 0-4. Repeatable."`
+	Lat         *float64 `help:"Latitude for location bias."`
+	Lng         *float64 `help:"Longitude for location bias."`
+	RadiusM     *float64 `help:"Radius in meters for location bias."`
+	Local       bool     `help:"Auto-detect local language (best effort)."`
 }
 
 // AutocompleteCmd runs autocomplete queries.
@@ -66,6 +67,7 @@ type NearbyCmd struct {
 	Lat         *float64 `help:"Latitude for location restriction."`
 	Lng         *float64 `help:"Longitude for location restriction."`
 	RadiusM     *float64 `help:"Radius in meters for location restriction."`
+	Local       bool     `help:"Auto-detect local language (best effort)."`
 }
 
 // DetailsCmd fetches place details.
@@ -74,6 +76,7 @@ type DetailsCmd struct {
 	Language string `help:"BCP-47 language code (e.g. en, en-US)."`
 	Region   string `help:"CLDR region code (e.g. US, DE)."`
 	Reviews  bool   `help:"Include reviews in the response."`
+	Local    bool   `help:"Auto-detect local language (two-pass lookup)."`
 }
 
 // ResolveCmd resolves a location string into candidates.
