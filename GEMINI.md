@@ -5,6 +5,7 @@
 
 ### Key Features
 - **Enhanced Details**: Fetches `userRatingCount`, `priceRange`, and detailed "serves" flags (Beer, Coffee, etc.).
+- **Auto-Localization**: Supports `--local` flag for automatic local language detection (two-pass lookup).
 - **Summaries**: Supports Editorial, AI-generated (Generative), and Review summaries.
 - **Price Representation**: Renders numeric price levels as repeated dollar signs (e.g., `$$`).
 - **No Photos**: Photo fetching has been removed to keep the CLI tool focused on textual metadata and scripting efficiency.

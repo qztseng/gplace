@@ -12,6 +12,7 @@ Modern Go client + CLI for the Google Places API (New). Fast for humans, tidy fo
 - **Route Search**: Search for places along a driving path (Routes API).
 - **Detailed Place Info**: 
   - **Ratings**: includes `user_rating_count` (e.g., `4.9 (1515)`).
+  - **Localization**: Automatic local language detection via the `--local` flag (two-pass lookup).
   - **Price Info**: Numeric price levels (rendered as `$$`) and specific `price_range` data.
   - **Summaries**: Editorial summaries, AI-generated overviews, and review summaries.
   - **Amenities**: Detailed "serves" flags (Beer, Breakfast, Brunch, Cocktails, Coffee, Dessert, Dinner, Lunch, Vegetarian, Wine).
@@ -46,14 +47,14 @@ Commands:
 
 ### Examples
 
-**Search with detailed ratings:**
+**Search with detailed ratings and local language:**
 ```bash
-gplace search "coffee" --min-rating 4 --limit 5
+gplace search "coffee" --min-rating 4 --local --limit 5
 ```
 
-**Fetch comprehensive details (including AI summaries and amenities):**
+**Fetch comprehensive details (including localized AI summaries and reviews):**
 ```bash
-gplace details ChIJ2x4b1GmrQjQRukd8iZLakA8 --reviews
+gplace details ChIJ2x4b1GmrQjQRukd8iZLakA8 --reviews --local
 ```
 
 **JSON Output for scripting:**
